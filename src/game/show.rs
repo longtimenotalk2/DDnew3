@@ -114,8 +114,10 @@ impl PawnShowList {
 
 impl Board {
   pub fn show_one_line(&self) {
-    for pawn in self.pawns() {
-      pawn.show_list().show_one_line();
+    for (i, pawn) in self.pawns().iter().enumerate() {
+      // 位置
+      print!("{i}] ");
+        pawn.show_list().show_one_line();
     }
   }
 }
