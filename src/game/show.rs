@@ -1,8 +1,8 @@
 // 专门管理显示的模块
 
 const RED : &str = "\u{1b}[31m";
-const GREEN : &str = "\u{1b}[32m";
-const YELLOW : &str = "\u{1b}[33m";
+// const GREEN : &str = "\u{1b}[32m";
+// const YELLOW : &str = "\u{1b}[33m";
 const BLUE : &str = "\u{1b}[34m";
 const RESET : &str = "\u{1b}[m";
 

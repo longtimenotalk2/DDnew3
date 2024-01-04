@@ -3,15 +3,15 @@ use crate::game::common::*;
 
 pub struct Pawn {
   unit: Unit,
-  id : Id,
+  _id : Id,
   team : Team,
 }
 
 impl Pawn {
-  pub fn new(unit: Unit, id: Id, team: Team) -> Self {
+  pub fn new(unit: Unit, _id: Id, team: Team) -> Self {
     Self {
       unit,
-      id,
+      _id,
       team,
     }
   }

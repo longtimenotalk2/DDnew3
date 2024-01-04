@@ -37,28 +37,28 @@ impl Unit {
   
 
   // 定量能力值
-  fn def(&self) -> i32 {
-    // 防御，力量相关
-    self.str() / 2
-  }
+  // fn def(&self) -> i32 {
+  //   // 防御，力量相关
+  //   self.str() / 2
+  // }
   
-  fn evd(&self, dir : Dir) -> i32 {
-    // 闪避，速度相关，取决于反应和移动能力
-    if !self.state.is_able() {return 0;}
-    (self.spd() as f64 * 5. * self.bound.move_coef() * self.pose.react_coef(dir) * self.pose.move_coef()) as i32
-  }
+  // fn evd(&self, dir : Dir) -> i32 {
+  //   // 闪避，速度相关，取决于反应和移动能力
+  //   if !self.state.is_able() {return 0;}
+  //   (self.spd() as f64 * 5. * self.bound.move_coef() * self.pose.react_coef(dir) * self.pose.move_coef()) as i32
+  // }
 
-  fn asd(&self, dir : Dir) -> i32 {
-    // 格挡，技巧相关，取决于反应以及上半身可用
-    if !self.state.is_able() || !self.bound.is_upper_able() {return 0;}
-    ((100. + self.skl() as f64 * 5.) * self.pose.react_coef(dir)) as i32
-  }
+  // fn asd(&self, dir : Dir) -> i32 {
+  //   // 格挡，技巧相关，取决于反应以及上半身可用
+  //   if !self.state.is_able() || !self.bound.is_upper_able() {return 0;}
+  //   ((100. + self.skl() as f64 * 5.) * self.pose.react_coef(dir)) as i32
+  // }
 
-  fn rfg(&self, dir : Dir) -> i32 {
-    // 暴击回避，速度相关，取决于反应
-    if !self.state.is_able() {return 0;}
-    ((50. + self.spd() as f64 * 5.) * self.pose.react_coef(dir)) as i32
-  }
+  // fn rfg(&self, dir : Dir) -> i32 {
+  //   // 暴击回避，速度相关，取决于反应
+  //   if !self.state.is_able() {return 0;}
+  //   ((50. + self.spd() as f64 * 5.) * self.pose.react_coef(dir)) as i32
+  // }
 
   // 属性
   pub fn str(&self) -> i32 {
