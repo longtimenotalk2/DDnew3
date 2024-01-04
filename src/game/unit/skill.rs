@@ -4,6 +4,17 @@ use crate::game::common::*;
 use super::Unit;
 
 impl Unit {
+  // 能否执行某能力
+  pub fn can_move(&self) -> bool {
+    // 移动的条件，清醒，站立，下半身没被捆
+    self.state.is_able() && self.pose.is_stand() && self.bound.is_lower_able()
+  }
+
+  pub fn can_block(&self) -> bool {
+    // 阻挡的条件，可以移动，且不能处于pin或者正在捆绑的状态
+    self.can_move() && !self.pose.is_pin() && !self.pose.is_tieing()
+  }
+  
   pub fn punch_ability(&self) -> Option<AttackInput> {
     // 挥拳的条件，需要上身不被捆绑，且站立
     if !self.bound.is_upper_able() || !self.pose.is_stand() {return None};

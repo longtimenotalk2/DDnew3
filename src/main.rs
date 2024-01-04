@@ -15,6 +15,8 @@ fn test_show() {
   let small3 = Unit::new("小弟丙", 12, 12, 12, Dir::Left);
   let board = Board::new(vec![(noel, 0),(elis, 0), (alyssa, 0), (yelin, 0),  (boss, 1), (small1, 1), (small2, 1),(small3, 1)]);
   board.show();
+
+  dbg!(board.move_option(6));
 }
 
 fn main() {

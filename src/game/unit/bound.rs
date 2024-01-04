@@ -15,17 +15,20 @@ impl Bound {
 
   // 定性影响
   pub fn is_upper_able(&self) -> bool {
-    !self.wrist
+    !self.is_wrist()
   }
 
+  pub fn is_lower_able(&self) -> bool {
+    !self.is_leg()
+  }
 
   // 定量影响
   pub fn move_coef(&self) -> f64 {
     let mut c = 1.0;
-    if self.wrist {c *= 0.8}
-    if self.arm {c *= 0.8}
-    if self.leg {c *= 0.5}
-    if self.lock {c *= 0.0}
+    if self.is_wrist() {c *= 0.8}
+    if self.is_arm() {c *= 0.8}
+    if self.is_leg() {c *= 0.5}
+    if self.is_lock() {c *= 0.0}
     c
   }
 

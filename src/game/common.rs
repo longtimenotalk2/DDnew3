@@ -1,6 +1,7 @@
 // 类型
 pub type Id = u32;
 pub type Team = u32;
+pub type Pos = i32;
 
 // 结构
 // acc - evd = hit
