@@ -26,11 +26,64 @@ pub struct AttactAnalyse {
   pub dmg_cri : i32,
 }
 
+#[derive(Debug, Clone)]
+pub struct Target {
+  pos : Option<Pos>,
+  dir : Option<Dir>,
+}
+
+impl Target {
+  pub fn new_move(pos : Pos, dir : Dir) -> Self {
+    Self {
+      pos: Some(pos),
+      dir: Some(dir),
+    }
+  }
+
+  pub fn to_string(&self, skl : Skill) -> String {
+    match skl {
+      Skill::Move => self.to_string_move(),
+    }
+  }
+
+  fn to_string_move(&self) -> String {
+    format!("{}位置{}", self.dir.unwrap().to_string(), self.pos.unwrap())
+  }
+}
+
+
+
 // 枚举
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Dir {
   Left,
   Right,
+}
+
+impl Dir {
+  pub fn to_string(&self) -> String {
+    match self {
+      Dir::Left => "↑".to_string(),
+      Dir::Right => "↓".to_string(),
+    }
+  }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Skill {
+  Move,
+}
+
+impl Skill {
+  pub fn iter() -> impl Iterator<Item = Self> {
+    [Self::Move].iter().cloned()
+  }
+
+  pub fn to_string(&self) -> String {
+    match self {
+      Self::Move => "移动",
+    }.to_string()
+  }
 }
 
 // 函数

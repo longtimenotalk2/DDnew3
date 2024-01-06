@@ -5,6 +5,22 @@ use super::Unit;
 
 impl Unit {
   // 能否执行某能力
+  pub fn can_skill(&self, skill : Skill) -> bool {
+    match skill {
+      Skill::Move => self.can_move(),
+    }
+  }
+
+  pub fn can_skill_list(&self) -> Vec<Skill> {
+    let mut list = Vec::new();
+    for skl in Skill::iter() {
+      if self.can_skill(skl) {
+        list.push(skl);
+      }
+    }
+    list
+  } 
+  
   pub fn can_move(&self) -> bool {
     // 移动的条件，清醒，站立，下半身没被捆
     self.state.is_able() && self.pose.is_stand() && self.bound.is_lower_able()
@@ -36,3 +52,4 @@ impl Unit {
     )
   }
 }
+

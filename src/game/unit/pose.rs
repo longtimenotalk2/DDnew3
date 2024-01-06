@@ -1,4 +1,5 @@
 use crate::game::common::*;
+use crate::game::unit::Unit;
 
 #[derive(Debug, Clone)]
 pub struct Pose {
@@ -79,4 +80,29 @@ impl Pose {
     }
     c
   }
+}
+
+impl Unit {
+  pub fn dir(&self) -> Option<Dir> {
+    self.pose.dir()
+  }
+
+  pub fn is_stand(&self) -> bool {
+    self.pose.is_stand()
+  }
+
+  pub fn is_pin(&self) -> bool {
+    self.pose.is_pin()
+  }
+
+  pub fn is_tieing(&self) -> bool {
+    self.pose.is_tieing()
+  }
+
+  pub fn is_ctrled(&self) -> bool {
+    self.pose.is_ctrled()
+  }
+  
+
+    
 }

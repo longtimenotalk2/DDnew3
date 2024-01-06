@@ -127,23 +127,23 @@ impl Pawn {
     let unit = self.unit();
     let name = &unit.name;
     let team = self.team();
-    let dir = unit.pose().dir();
-    let is_stand = unit.pose().is_stand();
-    let is_pin = unit.pose().is_pin();
-    let is_tieing = unit.pose().is_tieing();
-    let is_ctrled = unit.pose().is_ctrled();
-    let is_stun = unit.state().is_stun();
-    let stun_turn = unit.state().stun_turn();
-    let bound_upper = if unit.bound().is_arm() {
+    let dir = unit.dir();
+    let is_stand = unit.is_stand();
+    let is_pin = unit.is_pin();
+    let is_tieing = unit.is_tieing();
+    let is_ctrled = unit.is_ctrled();
+    let is_stun = unit.is_stun();
+    let stun_turn = unit.stun_turn();
+    let bound_upper = if unit.is_arm_bound() {
       BoundUpper::Full
-    } else if unit.bound().is_wrist() {
+    } else if unit.is_wrist_bound() {
       BoundUpper::Wrist
     } else {
       BoundUpper::None
     };
-    let bound_lower = if unit.bound().is_lock() {
+    let bound_lower = if unit.is_lock_bound() {
       BoundLower::Lock
-    } else if unit.bound().is_leg() {
+    } else if unit.is_leg_bound() {
       BoundLower::Leg
     } else {
       BoundLower::None

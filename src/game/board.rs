@@ -1,12 +1,16 @@
 pub mod pawn;
 mod action;
+pub mod round;
+pub mod select;
 
 use super::unit::Unit;
 use crate::game::common::*;
 use pawn::Pawn;
+use round::Round;
 
 pub struct Board {
   pawns : Vec<Pawn>,
+  round : Round,
 }
 
 impl Board {
@@ -23,12 +27,17 @@ impl Board {
     }
     Board {
       pawns,
+      round : Round::new(),
     }
   }
 
   // 外部函数
   pub fn show(&self) {
     self.show_one_line();
+  }
+
+  pub fn play(&mut self) {
+    loop {self.main_loop()};
   }
 
   // 查找

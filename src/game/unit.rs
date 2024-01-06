@@ -33,10 +33,19 @@ impl Unit {
       bound: Bound::new(),
     }
   }
-
   
 
+
   // 定量能力值
+  pub fn action_point(&self, fix : i32) -> Option<i32> {
+    if self.is_action() {
+      let action_point = 100 * self.spd() + fix;
+      Some(action_point)
+    } else {
+      None
+    }
+  }
+  
   // fn def(&self) -> i32 {
   //   // 防御，力量相关
   //   self.str() / 2
@@ -74,17 +83,29 @@ impl Unit {
   }
 
   // 基本索引
-  pub fn state(&self) -> &State {
-    &self.state
-  }
+  // pub fn state(&self) -> &State {
+  //   &self.state
+  // }
 
-  pub fn pose(&self) -> &Pose {
-    &self.pose
-  }
+  // pub fn pose(&self) -> &Pose {
+  //   &self.pose
+  // }
 
-  pub fn bound(&self) -> &Bound {
-    &self.bound
-  }
+  // pub fn bound(&self) -> &Bound {
+  //   &self.bound
+  // }
+
+  // pub fn state_mut(&mut self) -> &mut State {
+  //   &mut self.state
+  // }
+
+  // pub fn pose_mut(&mut self) -> &mut Pose {
+  //   &mut self.pose
+  // }
+
+  // pub fn bound_mut(&mut self) -> &mut Bound {
+  //   &mut self.bound
+  // }
 }
 
 

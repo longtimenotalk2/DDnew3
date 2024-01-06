@@ -16,6 +16,14 @@ impl Pawn {
     }
   }
 
+  // 属性
+  pub fn action_point(&self) -> Option<i32> {
+    let fix = 50 - self.id as i32;
+    self.unit.action_point(fix)
+  }
+
+  // 索引
+
   pub fn unit(&self) -> &Unit {
     &self.unit
   }
@@ -26,5 +34,9 @@ impl Pawn {
 
   pub fn id(&self) -> Id {
     self.id
+  }
+
+  pub fn unit_mut(&mut self) -> &mut Unit {
+    &mut self.unit
   }
 }

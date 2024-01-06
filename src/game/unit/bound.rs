@@ -1,4 +1,4 @@
-
+use crate::game::unit::Unit;
 
 #[derive(Debug, Clone, Default)]
 pub struct Bound {
@@ -49,4 +49,22 @@ impl Bound {
     self.lock
   }
     
+}
+
+impl Unit {
+  pub fn is_wrist_bound(&self) -> bool {
+    self.bound.is_wrist()
+  }
+
+  pub fn is_arm_bound(&self) -> bool {
+    self.bound.is_arm()
+  }
+
+  pub fn is_leg_bound(&self) -> bool {
+    self.bound.is_leg()
+  }
+
+  pub fn is_lock_bound(&self) -> bool {
+    self.bound.is_lock()
+  }
 }

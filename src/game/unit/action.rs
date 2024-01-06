@@ -5,6 +5,15 @@ use super::Unit;
 use super::common::*;
 
 impl Unit {
+  // 变动
+  pub fn restore_action(&mut self) {
+    self.state.restore_action();
+  }
+
+  pub fn consume_action(&mut self) {
+    self.state.consume_action();
+  }
+  
   // 受到攻击分析
   pub fn be_attacked_analyse(&self, input : AttackInput, dir : Dir) -> AttactAnalyse {
     // 信息录入
