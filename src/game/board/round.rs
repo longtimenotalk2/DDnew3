@@ -18,6 +18,15 @@ pub struct Round {
   team_now : Option<Team>,
 }
 
+impl Round {
+  pub fn show(&self) {
+    println!("Round: {}", self.round_num);
+    println!("Phase: {:?}", self.phase);
+    println!("AP: {:?}", self.ap);
+    println!("Team now: {:?}", self.team_now);
+  }
+}
+
 pub enum TurnResult {
   Wait,
   End,
@@ -36,10 +45,6 @@ impl Round {
   pub fn round_num(&self) -> i32 {
     self.round_num
   }
-
-  fn round_next(&mut self) {
-    self.round_num += 1;
-  }
 }
 
 impl Board {
@@ -47,7 +52,7 @@ impl Board {
     match self.round.phase {
       Phase::Start => self.start(),
       Phase::Main => self.main(),
-      Phase::End => {},
+      Phase::End => {self.end()},
     }
   }
 
@@ -61,6 +66,13 @@ impl Board {
     self.round.phase = Phase::Main;
   }
 
+  fn end(&mut self) {
+    self.round.phase = Phase::Start;
+    self.round.team_now = None;
+    self.round.ap = None;
+    self.round.round_num += 1;
+  }
+
   fn main(&mut self) {
     // 如果还没有当前行动方，则执行主要阶段开始
     if self.round.team_now.is_none() {
@@ -68,10 +80,24 @@ impl Board {
     }
     // 寻找当前方的可动角色，如果不存在则直接进入结束阶段
     let ids = self.next_can_action_ids();
+    self.round.show();
     if !ids.is_empty() {
+      // 显示
+      self.show_w_ids(&ids);
       // 处理这些角色的选择（在select mod）
       let can_wait = self.can_wait();
-      let selected = self.turn_select(self.round.team_now.unwrap(), &ids, can_wait);
+      let selected = self.turn_select(&ids, can_wait);
+      if let Some((id, skl, tgt)) = selected {
+        // 执行技能
+        self.turn_main(id, skl, tgt);
+        self.after_turn();
+      } else {
+        // 等待
+        for id in &ids {
+          self.id2pawn_mut(*id).unit_mut().to_wait();
+          self.after_wait();
+        }
+      }
     } else {
       // 进入结束阶段
       self.round.phase = Phase::End;
@@ -122,7 +148,17 @@ impl Board {
         return
       }
     }
+    // 换边，并再次计算新的速度值
     self.round.team_now = Some(1 - self.round.team_now.unwrap());
+    let mut max_ap = 0;
+    for pawn in self.pawns.iter() {
+      if pawn.team() != self.round.team_now.unwrap() && pawn.action_point().is_some_and(|ap| ap > max_ap) {
+        max_ap = pawn.action_point().unwrap();
+      }
+    }
+    if max_ap < self.round.ap.unwrap() {
+      self.round.ap = Some(max_ap);
+    }
   }
 
   // 一方选择等待后
@@ -143,12 +179,12 @@ impl Board {
 
   // ap已设置好之后
   fn next_can_action_ids(&self) -> Vec<Id> {
-    // 如果当前方尚有可动角色ap大于当前ap，返回对应的值，否则返回None
+    // 如果当前方尚有可动角色ap大于等于当前ap，返回对应的值，否则返回None
     if let Some(ap) = self.round.ap {
       if let Some(team_now) = self.round.team_now {
         let mut ids = Vec::new();
         for pawn in self.pawns.iter() {
-          if pawn.team() == team_now && pawn.action_point().is_some_and(|a| a > ap) {
+          if pawn.team() == team_now && pawn.action_point().is_some_and(|a| a >= ap) {
             ids.push(pawn.id());
           }
         }

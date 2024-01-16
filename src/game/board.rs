@@ -1,6 +1,7 @@
 pub mod pawn;
 mod action;
 pub mod round;
+pub mod turn;
 pub mod select;
 
 use super::unit::Unit;
@@ -32,8 +33,8 @@ impl Board {
   }
 
   // 外部函数
-  pub fn show(&self) {
-    self.show_one_line();
+  pub fn show_w_ids(&self, ids : &[Id]) {
+    self.show_one_line(ids);
   }
 
   pub fn play(&mut self) {
@@ -59,6 +60,15 @@ impl Board {
     unreachable!()
   }
 
+  pub fn id2pawn_mut(&mut self, id : Id) -> &mut Pawn {
+    for pawn in self.pawns.iter_mut() {
+      if pawn.id() == id {
+        return pawn;
+      }
+    }
+    unreachable!()
+  }
+
   pub fn pos2pawn_try(&self, pos : Pos) -> Option<&Pawn> {
     if pos >= 0 {
       self.pawns.get(pos as usize)
@@ -74,5 +84,9 @@ impl Board {
   // 索引
   pub fn pawns(&self) -> &[Pawn] {
     &self.pawns
+  }
+
+  pub fn round(&self) -> &Round {
+    &self.round
   }
 }

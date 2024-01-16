@@ -8,6 +8,7 @@ impl Unit {
   pub fn can_skill(&self, skill : Skill) -> bool {
     match skill {
       Skill::Move => self.can_move(),
+      Skill::Pass => true,
     }
   }
 

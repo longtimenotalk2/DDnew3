@@ -18,7 +18,7 @@ impl Pawn {
 
   // 属性
   pub fn action_point(&self) -> Option<i32> {
-    let fix = 50 - self.id as i32;
+    let fix = self.id as i32;
     self.unit.action_point(fix)
   }
 

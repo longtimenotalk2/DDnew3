@@ -113,10 +113,19 @@ impl PawnShowList {
 }
 
 impl Board {
-  pub fn show_one_line(&self) {
+  pub fn show_one_line(&self, ids : &[Id]) {
     for (i, pawn) in self.pawns().iter().enumerate() {
+      // 状态码
+      let id = pawn.id();
+      let m = if ids.contains(&id) {
+        ">"
+      } else if pawn.unit().is_wait() {
+        "w"
+      } else if pawn.unit().is_action() {
+        "|"
+      } else {" "};
       // 位置
-      print!("{i}] ");
+      print!("{i}{m} ");
         pawn.show_list().show_one_line();
     }
   }

@@ -29,15 +29,15 @@ impl SelectSet {
 }
 
 impl Board {
-  pub fn turn_select(&self, team : Team, ids : &[Id], can_wait : bool) -> Option<(Id, Skill, Target)> {
-    let set = self.select_set(team, ids);
+  pub fn turn_select(&self, ids : &[Id], can_wait : bool) -> Option<(Id, Skill, Target)> {
+    let set = self.select_set(ids);
     // 选择角色或者等待
     let mut options : Vec<String> = ids.iter().map(|id| self.id2pawn(*id).unit().name.clone()).collect();
     if can_wait {
       options.push("等待".to_string());
     }
     let index = io("请选择希望行动的角色：".to_string(), &options, None);
-    if index == options.len() {
+    if index == ids.len() {
       // 执行了等待
       return None
     }
@@ -45,10 +45,17 @@ impl Board {
 
     // 选择技能
     let skills = set.id2skills(id);
-    let options : Vec<String> = skills.iter().map(|s| s.to_string()).collect();
+    let mut skills_can = vec!();
+    for skill in &skills {
+      if set.skill2targets(id, *skill).len() > 0 {
+        skills_can.push(skill);
+      }
+    }
+    // 移除无目标选项
+    let options : Vec<String> = skills_can.iter().map(|s| s.to_string()).collect();
     let title = format!("{} 选择技能", self.id2pawn(id).unit().name);
     let index = io(title, &options, None);
-    let skill = skills[index];
+    let skill = *skills_can[index];
 
     // 选择目标
     let targets = set.skill2targets(id, skill);
@@ -61,7 +68,7 @@ impl Board {
   }
   
   // 根据可动角色，生成完整的SelectSet
-  fn select_set(&self, team : Team, ids : &[Id]) -> SelectSet {
+  fn select_set(&self, ids : &[Id]) -> SelectSet {
     // 生成所有行动分支
     let mut set : HashMap<Id, HashMap<Skill, Vec<Target>>> = HashMap::new();
     for id in ids {
@@ -74,6 +81,9 @@ impl Board {
             for (pos, dir) in self.move_option(*id) {
               targets.push(Target::new_move(pos, dir))
             }
+          },
+          Skill::Pass => {
+            targets.push(Target::empty())
           },
         }
         sklset.insert(skl, targets);

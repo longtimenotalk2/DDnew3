@@ -1,6 +1,9 @@
 use std::io;
 
-pub fn io(title: String, options : &[String], default : Option<usize>) -> usize {
+pub fn io(title: String, options : &[String], mut default : Option<usize>) -> usize {
+  if default.is_none() {
+    default = Some(0);
+  }
   println!("{}", title);
   // 显示所有选项
   for (i, option) in options.iter().enumerate() {

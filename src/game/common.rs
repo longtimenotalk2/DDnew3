@@ -40,9 +40,17 @@ impl Target {
     }
   }
 
+  pub fn empty() -> Self {
+    Self {
+      pos: None,
+      dir: None,
+    }
+  }
+
   pub fn to_string(&self, skl : Skill) -> String {
     match skl {
       Skill::Move => self.to_string_move(),
+      Skill::Pass => "无目标".to_string(),
     }
   }
 
@@ -72,16 +80,18 @@ impl Dir {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Skill {
   Move,
+  Pass,
 }
 
 impl Skill {
   pub fn iter() -> impl Iterator<Item = Self> {
-    [Self::Move].iter().cloned()
+    [Self::Move, Self::Pass].iter().cloned()
   }
 
   pub fn to_string(&self) -> String {
     match self {
       Self::Move => "移动",
+      Self::Pass => "略过",
     }.to_string()
   }
 }
