@@ -4,7 +4,7 @@ use game::unit::Unit;
 use game::board::Board;
 use game::common::*;
 
-fn test_show() {
+fn test_team() {
   let noel = Unit::new("诺艾尔", 10, 10, 10, Dir::Right);
   let elis = Unit::new("伊莉丝", 12, 18, 13, Dir::Right);
   let alyssa = Unit::new("艾丽莎", 11, 15, 16, Dir::Right);
@@ -32,6 +32,6 @@ fn test_solo() {
 
 fn main() {
   println!("Hello, world!");
-  test_solo();
+  test_team();
   
 }

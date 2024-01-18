@@ -102,6 +102,10 @@ impl Unit {
   pub fn is_ctrled(&self) -> bool {
     self.pose.is_ctrled()
   }
+
+  pub fn set_dir(&mut self, dir : Dir) {
+    self.pose.dir = Some(dir);
+  }
   
 
     

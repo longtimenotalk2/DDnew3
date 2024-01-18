@@ -5,7 +5,7 @@ use super::super::board::Board;
 use crate::game::common::*;
 
 impl Board {
-  // 目标选择
+  // 移动
   pub fn move_option(&self, id : Id) -> Vec<(Pos, Dir)> {
     // 分别向左和向右看，直到看到不能移动上的位置
     let pos = self.id2pos(id);
@@ -36,5 +36,13 @@ impl Board {
 
     lists[0].reverse();
     lists.concat()
+  }
+
+  pub fn move_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
+    let pos_o = self.id2pos(id);
+    let mut pawn = self.pawns.remove(pos_o as usize);
+    pawn.unit_mut().set_dir(dir);
+    let index_new = pos as usize;
+    self.pawns.insert(index_new, pawn);
   }
 }

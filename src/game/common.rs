@@ -57,6 +57,14 @@ impl Target {
   fn to_string_move(&self) -> String {
     format!("{}位置{}", self.dir.unwrap().to_string(), self.pos.unwrap())
   }
+
+  pub fn pos(&self) -> Option<Pos> {
+    self.pos
+  }
+
+  pub fn dir(&self) -> Option<Dir> {
+    self.dir
+  }
 }
 
 
@@ -86,6 +94,16 @@ pub enum Skill {
 impl Skill {
   pub fn iter() -> impl Iterator<Item = Self> {
     [Self::Move, Self::Pass].iter().cloned()
+  }
+
+  pub fn sort(v : &mut Vec<Self>) {
+    let mut v2 = Vec::new();
+    for skl in Self::iter() {
+      if v.contains(&skl){
+        v2.push(skl);
+      }
+    }
+    *v = v2;
   }
 
   pub fn to_string(&self) -> String {

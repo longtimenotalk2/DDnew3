@@ -48,14 +48,15 @@ impl Board {
     let mut skills_can = vec!();
     for skill in &skills {
       if set.skill2targets(id, *skill).len() > 0 {
-        skills_can.push(skill);
+        skills_can.push(*skill);
       }
     }
-    // 移除无目标选项
+    Skill::sort(&mut skills_can);
     let options : Vec<String> = skills_can.iter().map(|s| s.to_string()).collect();
+    
     let title = format!("{} 选择技能", self.id2pawn(id).unit().name);
     let index = io(title, &options, None);
-    let skill = *skills_can[index];
+    let skill = skills_can[index];
 
     // 选择目标
     let targets = set.skill2targets(id, skill);
