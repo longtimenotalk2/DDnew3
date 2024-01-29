@@ -9,6 +9,9 @@ impl Board {
     let mut unit = self.id2pawn_mut(id).unit_mut();
     unit.consume_action();
 
+    // 行动前状态变化
+    unit.turn_start();
+
     match skl {
       Skill::Pass => {},
       Skill::Move => {

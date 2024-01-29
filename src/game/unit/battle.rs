@@ -42,7 +42,11 @@ impl Unit {
 
   // &mut 函数
   pub fn be_attack_exe(&mut self, result : &AttackResult) {
-    self.hurt_exe(result.dmg());
+    // 潜质
+    self.pose.pin_exe();
+    // 造成伤害
+    self.state.hurt_exe(result.dmg());
+    // 击晕
     if result.is_cri() {
       // 暴击击晕
       let n = self.be_attack_stun_turn(result.dmg());
@@ -53,8 +57,8 @@ impl Unit {
   // 帮助函数
 
   fn action_stun(&mut self, n : i32) {
-    self.stun_exe(n);
-    self.fall_exe();
+    self.state.stun_exe(n);
+    self.pose.fall_exe();
   }
 
   fn def(&self) -> i32 {

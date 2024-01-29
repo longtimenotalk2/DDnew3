@@ -3,6 +3,7 @@ pub mod bound;
 pub mod state;
 pub mod skill;
 pub mod battle;
+pub mod action;
 
 use pose::Pose;
 use bound::Bound;

@@ -80,6 +80,21 @@ impl Pose {
     }
     c
   }
+  
+  // 变动
+
+  pub fn fall_exe(&mut self) {
+    self.stand = false;
+    self.dir = None;
+  }
+  
+  pub fn pin_exe(&mut self) {
+    self.pin = true;
+  }
+
+  pub fn pin_cancel(&mut self) {
+    self.pin = false;
+  }
 }
 
 impl Unit {
@@ -102,17 +117,9 @@ impl Unit {
   pub fn is_ctrled(&self) -> bool {
     self.pose.is_ctrled()
   }
+  
   // 变动
-
   pub fn set_dir(&mut self, dir : Dir) {
     self.pose.dir = Some(dir);
   }
-
-  pub fn fall_exe(&mut self) {
-    self.pose.stand = false;
-    self.pose.dir = None;
-  }
-  
-
-    
 }

@@ -27,11 +27,6 @@ impl Round {
   }
 }
 
-pub enum TurnResult {
-  Wait,
-  End,
-}
-
 impl Round {
   pub fn new() -> Self {
     Round {
@@ -58,8 +53,7 @@ impl Board {
 
   fn start(&mut self) {
     for pawn in self.pawns.iter_mut() {
-      pawn.unit_mut().restore_stun();
-      pawn.unit_mut().restore_action();
+      pawn.unit_mut().round_start();
     }
     self.round.team_now = None;
     self.round.ap = None;

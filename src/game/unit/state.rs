@@ -14,37 +14,6 @@ impl State {
     Self::default()
   }
 
-  // 变动
-  fn restore_action(&mut self) {
-    if !self.is_stun() {
-      self.action = true;
-    }
-  }
-
-  fn restore_stun(&mut self) {
-    if let Some(mut stun) = self.stun {
-      stun -= 1;
-      if stun <= 0 {
-        self.stun = None;
-      } else {
-        self.stun = Some(stun);
-      }
-    }
-  }
-
-  fn consume_action(&mut self) {
-    self.action = false;
-    self.wait = false;
-  }
-
-  fn to_wait(&mut self) {
-    self.wait = true;
-  }
-
-  fn cancel_wait(&mut self) {
-    self.wait = false;
-  }
-
   // 定性状态
   pub fn is_able(&self) -> bool {
     self.stun.is_none()
@@ -71,44 +40,44 @@ impl State {
   pub fn stun_turn(&self) -> i32 {
     self.stun.unwrap_or(0)
   }
-    
-}
 
-impl Unit {
-  
   // 变动
-  pub fn restore_action(&mut self) {
-    self.state.restore_action();
-  }
-
-  pub fn restore_stun(&mut self) {
-    self.state.restore_stun();
-  }
-
-  pub fn consume_action(&mut self) {
-    self.state.consume_action();
-  }
-
-  pub fn to_wait(&mut self) {
-    self.state.to_wait();
-  }
-
-  pub fn cancel_wait(&mut self) {
-    self.state.cancel_wait();
-  }
-
   pub fn hurt_exe(&mut self, hurt : i32) {
-    self.state.hurt += hurt;
+    self.hurt += hurt;
   }
 
   pub fn stun_exe(&mut self, stun : i32) {
-    self.consume_action();
-    if self.state.stun.is_some() {
-      self.state.stun = Some(self.state.stun.unwrap() + stun);
+    self.action = false;
+    if self.stun.is_some() {
+      self.stun = Some(self.stun.unwrap() + stun);
     } else {
-      self.state.stun = Some(stun);
+      self.stun = Some(stun);
     }
   }
+
+  pub fn stun_restore(&mut self) {
+    if let Some(mut n) = self.stun {
+      n = n - 1;
+      if n == 0 {
+        self.stun = None;
+      } else {
+        self.stun = Some(n);
+      }
+    }
+  }
+
+  pub fn hurt_restore(&mut self) {
+    // 回复值为受伤开平方
+    let heal = (self.hurt as f64).sqrt().floor() as i32;
+    self.hurt -= heal;
+  }
+
+  pub fn action_restore(&mut self) {
+    if self.stun.is_none() {
+      self.action = true;
+    }
+  }
+
 }
 
 impl Unit {
@@ -130,5 +99,18 @@ impl Unit {
 
   pub fn hurt(&self) -> i32 {
     self.state.hurt
+  }
+
+  // 变动
+  pub fn consume_action(&mut self) {
+    self.state.action = false;
+  }
+
+  pub fn to_wait(&mut self) {
+    self.state.wait = true;
+  }
+
+  pub fn cancel_wait(&mut self) {
+    self.state.wait = false;
   }
 }
