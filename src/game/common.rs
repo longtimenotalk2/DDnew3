@@ -1,3 +1,7 @@
+// 全局开关
+pub const SHOW_BATTLE_EXPECT : u32 = 1;
+pub const SHOW_BATTLE_DETAIL : u32 = 1;
+
 // 类型
 pub type Id = u32;
 pub type Team = u32;
@@ -5,7 +9,7 @@ pub type Pos = i32;
 
 // 结构
 // acc - evd = hit
-// pir - asd = dir
+// pir - asd = stt
 // whk - rfg = cri
 
 #[derive(Debug, Clone)]
@@ -17,13 +21,84 @@ pub struct AttackInput {
 }
 
 #[derive(Debug, Clone)]
-pub struct AttactAnalyse {
+pub struct AttackAnalyse {
   pub hit : i32,
   pub stt : i32,
   pub cri : i32,
   pub dmg_asd : i32,
   pub dmg_stt : i32,
   pub dmg_cri : i32,
+}
+
+impl AttackAnalyse {
+  pub fn to_string(&self) -> String {
+    format!("命{}, 穿{}, 爆{}, {}/{}/{}", self.hit, self.stt, self.cri, self.dmg_asd, self.dmg_stt, self.dmg_cri)
+  }
+}
+
+#[derive(Debug, Clone)]
+pub struct AttackResult {
+  dmg : i32,
+  is_hit : bool,
+  is_asd : bool,
+  is_stt : bool,
+  is_cri : bool,
+  analyse : Option<AttackAnalyse>,
+}
+
+impl AttackResult {
+  pub fn from_analyse(ana : &AttackAnalyse, r_hit : i32, r_stt : i32, r_cri : i32) -> Self {
+    if r_hit > ana.hit {
+      // 未命中
+      Self::new(0, false, false, ana)
+    } else {
+      if r_stt > ana.stt {
+        // 格挡住了
+        Self::new(ana.dmg_asd, true, false, ana)
+      } else {
+        if r_cri > ana.cri {
+          // 直击未暴击
+          Self::new(ana.dmg_stt, false, false, ana)
+        } else {
+          // 暴击
+          Self::new(ana.dmg_cri, false, true, ana)
+        }
+      }
+    }
+  }
+  
+  pub fn new(dmg : i32, is_asd : bool, is_cri : bool, ana : &AttackAnalyse) -> Self {
+    let is_hit = dmg > 0;
+    let is_stt = is_hit && !is_asd;
+    Self {
+      dmg,
+      is_hit,
+      is_asd,
+      is_stt,
+      is_cri,
+      analyse : Some(ana.clone()),
+    }
+  }
+
+  pub fn dmg(&self) -> i32 {
+    self.dmg
+  }
+  pub fn is_hit(&self) -> bool {
+    self.is_hit
+  }
+  pub fn is_asd(&self) -> bool {
+    self.is_asd
+  }
+  pub fn is_stt(&self) -> bool {
+    self.is_stt
+  }
+  pub fn is_cri(&self) -> bool {
+    self.is_cri
+  }
+
+  pub fn analyse(&self) -> Option<&AttackAnalyse> {
+    self.analyse.as_ref()
+  }
 }
 
 #[derive(Debug, Clone)]
@@ -40,6 +115,13 @@ impl Target {
     }
   }
 
+  pub fn new_attack(pos : Pos, dir : Dir) -> Self {
+    Self {
+      pos: Some(pos),
+      dir: Some(dir),
+    }
+  }
+
   pub fn empty() -> Self {
     Self {
       pos: None,
@@ -47,14 +129,7 @@ impl Target {
     }
   }
 
-  pub fn to_string(&self, skl : Skill) -> String {
-    match skl {
-      Skill::Move => self.to_string_move(),
-      Skill::Pass => "无目标".to_string(),
-    }
-  }
-
-  fn to_string_move(&self) -> String {
+  pub fn to_string(&self) -> String {
     format!("{}位置{}", self.dir.unwrap().to_string(), self.pos.unwrap())
   }
 
@@ -87,13 +162,18 @@ impl Dir {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Skill {
+  Punch,
   Move,
   Pass,
 }
 
 impl Skill {
   pub fn iter() -> impl Iterator<Item = Self> {
-    [Self::Move, Self::Pass].iter().cloned()
+    [
+      Self::Punch,
+      Self::Move, 
+      Self::Pass,
+    ].iter().cloned()
   }
 
   pub fn sort(v : &mut Vec<Self>) {
@@ -108,6 +188,7 @@ impl Skill {
 
   pub fn to_string(&self) -> String {
     match self {
+      Self::Punch => "挥拳",
       Self::Move => "移动",
       Self::Pass => "略过",
     }.to_string()
@@ -125,4 +206,13 @@ pub fn i2lv(i : i32) -> Option<i32> {
 
 pub fn i2pro(i : i32) -> i32 {
   (i.max(0)).min(100)
+}
+
+pub fn i2dmg(i : i32) -> i32 {
+  i.max(1)
+}
+
+// 接口
+pub trait Dice {
+  fn d100(&mut self) -> i32;
 }

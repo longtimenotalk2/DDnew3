@@ -2,6 +2,7 @@ pub mod pose;
 pub mod bound;
 pub mod state;
 pub mod skill;
+pub mod battle;
 
 use pose::Pose;
 use bound::Bound;
@@ -45,29 +46,6 @@ impl Unit {
       None
     }
   }
-  
-  // fn def(&self) -> i32 {
-  //   // 防御，力量相关
-  //   self.str() / 2
-  // }
-  
-  // fn evd(&self, dir : Dir) -> i32 {
-  //   // 闪避，速度相关，取决于反应和移动能力
-  //   if !self.state.is_able() {return 0;}
-  //   (self.spd() as f64 * 5. * self.bound.move_coef() * self.pose.react_coef(dir) * self.pose.move_coef()) as i32
-  // }
-
-  // fn asd(&self, dir : Dir) -> i32 {
-  //   // 格挡，技巧相关，取决于反应以及上半身可用
-  //   if !self.state.is_able() || !self.bound.is_upper_able() {return 0;}
-  //   ((100. + self.skl() as f64 * 5.) * self.pose.react_coef(dir)) as i32
-  // }
-
-  // fn rfg(&self, dir : Dir) -> i32 {
-  //   // 暴击回避，速度相关，取决于反应
-  //   if !self.state.is_able() {return 0;}
-  //   ((50. + self.spd() as f64 * 5.) * self.pose.react_coef(dir)) as i32
-  // }
 
   // 属性
   pub fn str(&self) -> i32 {
@@ -81,31 +59,6 @@ impl Unit {
   pub fn spd(&self) -> i32 {
     (self.spd - self.state.attr_decrease()).max(0)
   }
-
-  // 基本索引
-  // pub fn state(&self) -> &State {
-  //   &self.state
-  // }
-
-  // pub fn pose(&self) -> &Pose {
-  //   &self.pose
-  // }
-
-  // pub fn bound(&self) -> &Bound {
-  //   &self.bound
-  // }
-
-  // pub fn state_mut(&mut self) -> &mut State {
-  //   &mut self.state
-  // }
-
-  // pub fn pose_mut(&mut self) -> &mut Pose {
-  //   &mut self.pose
-  // }
-
-  // pub fn bound_mut(&mut self) -> &mut Bound {
-  //   &mut self.bound
-  // }
 }
 
 

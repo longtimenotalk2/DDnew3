@@ -12,10 +12,11 @@ use round::Round;
 pub struct Board {
   pawns : Vec<Pawn>,
   round : Round,
+  dice : Box<dyn Dice>,
 }
 
 impl Board {
-  pub fn new(data : Vec<(Unit, Team)>) -> Self {
+  pub fn new(data : Vec<(Unit, Team)>, dice : impl Dice + 'static) -> Self {
     let mut pawns = Vec::new();
     let mut id : Id = 0;
     for (unit, team) in data {
@@ -29,6 +30,7 @@ impl Board {
     Board {
       pawns,
       round : Round::new(),
+      dice : Box::new(dice),
     }
   }
 
@@ -49,6 +51,10 @@ impl Board {
       }
     }
     unreachable!()
+  }
+
+  pub fn pos2id(&self, pos : Pos) -> Id {
+    self.pos2pawn(pos).id()
   }
 
   pub fn id2pawn(&self, id : Id) -> &Pawn {

@@ -96,6 +96,19 @@ impl Unit {
   pub fn cancel_wait(&mut self) {
     self.state.cancel_wait();
   }
+
+  pub fn hurt_exe(&mut self, hurt : i32) {
+    self.state.hurt += hurt;
+  }
+
+  pub fn stun_exe(&mut self, stun : i32) {
+    self.consume_action();
+    if self.state.stun.is_some() {
+      self.state.stun = Some(self.state.stun.unwrap() + stun);
+    } else {
+      self.state.stun = Some(stun);
+    }
+  }
 }
 
 impl Unit {
@@ -113,5 +126,9 @@ impl Unit {
 
   pub fn stun_turn(&self) -> i32 {
     self.state.stun_turn()
+  }
+
+  pub fn hurt(&self) -> i32 {
+    self.state.hurt
   }
 }

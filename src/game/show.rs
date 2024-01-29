@@ -1,7 +1,7 @@
 // 专门管理显示的模块
 
 const RED : &str = "\u{1b}[31m";
-// const GREEN : &str = "\u{1b}[32m";
+const GREEN : &str = "\u{1b}[32m";
 // const YELLOW : &str = "\u{1b}[33m";
 const BLUE : &str = "\u{1b}[34m";
 const RESET : &str = "\u{1b}[m";
@@ -39,6 +39,7 @@ struct PawnShowList {
   str : i32,
   skl : i32,
   spd : i32,
+  hurt : i32,
 }
 
 impl PawnShowList {
@@ -105,6 +106,9 @@ impl PawnShowList {
 
     // 力、技、速
     line += &format!("(力{:2} 技{:2} 速{:2})", self.str, self.skl, self.spd);
+
+    // 受伤
+    line += &format!(" 伤{:2}", self.hurt);
     
     
     // 输出
@@ -160,6 +164,7 @@ impl Pawn {
     let str = unit.str();
     let skl = unit.skl();
     let spd = unit.spd();
+    let hurt = unit.hurt();
     
     
     PawnShowList {
@@ -177,6 +182,57 @@ impl Pawn {
       str,
       skl,
       spd,
+      hurt,
     }
   } 
+}
+
+impl AttackResult {
+  pub fn show(&self) {
+    if let Some(ana) = self.analyse() {
+      let mut dmg_asd = format!("{}", ana.dmg_asd);
+      let mut dmg_stt = format!("{}", ana.dmg_stt);
+      let mut dmg_cri = format!("{}", ana.dmg_cri);
+      let hit = if self.is_hit() {
+
+        add_color(&format!("{}", ana.hit), GREEN)
+      } else {
+        add_color(&format!("{}", ana.hit), RED)
+        
+      };
+      let stt = if self.is_stt() {
+        add_color(&format!("{}", ana.stt), GREEN)
+      } else {
+        add_color(&format!("{}", ana.stt), RED)
+      };
+      let cri = if self.is_cri() {
+        add_color(&format!("{}", ana.cri), GREEN)
+      } else {
+        add_color(&format!("{}", ana.cri), RED)
+      };
+      if self.is_cri() {
+        dmg_cri = add_color(&dmg_cri, GREEN);
+      } else if self.is_stt() {
+        dmg_stt = add_color(&dmg_stt, GREEN);
+      } else if self.is_hit() {
+        dmg_asd = add_color(&dmg_asd, GREEN);
+      }
+
+      let mut r = String::new();
+      if self.dmg() > 0 {
+        r += &format!("{}", self.dmg());
+        if self.is_cri() {
+          r += "!";
+        }
+      } else {
+        r += "落空";
+      }
+      
+      println!("命{hit}, 穿{stt}, 爆{cri} ({dmg_asd}/{dmg_stt}/{dmg_cri}) {r}")
+    }
+  }
+}
+
+fn add_color(s : &str, color : &str) -> String {
+  format!("{}{}{}", color, s, RESET)
 }

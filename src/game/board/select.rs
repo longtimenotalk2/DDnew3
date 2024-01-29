@@ -60,7 +60,21 @@ impl Board {
 
     // 选择目标
     let targets = set.skill2targets(id, skill);
-    let options : Vec<String> = targets.iter().map(|t| t.to_string(skill)).collect();
+    let mut options = vec!();
+    for target in &targets {
+      match skill {
+        Skill::Punch => {
+          let name = self.pos2pawn(target.pos().unwrap()).unit().name.clone();
+          let atk_input = self.id2pawn(id).unit().punch_ability();
+          let analyse = self.pos2pawn(target.pos().unwrap()).unit().be_attack_analyse(target.dir().unwrap(), &atk_input);
+          let txt = format!("{name} ({})", analyse.to_string());
+          options.push(txt);
+        }
+        Skill::Move => 
+      options.push(target.to_string()),
+        _ => options.push("无目标".to_string()),
+      }
+    }
     let title = format!("{} 为 {} 选择目标", self.id2pawn(id).unit().name, skill.to_string());
     let index = io(title, &options, None);
     let target = targets[index].clone();
@@ -78,6 +92,12 @@ impl Board {
       for skl in pawn.unit().can_skill_list() {
         let mut targets = Vec::new();
         match skl {
+          Skill::Punch => {
+            let can_move = pawn.unit().can_move();
+            for (pos, dir) in self.melee_option(*id, can_move) {
+              targets.push(Target::new_attack(pos, dir))
+            }
+          }
           Skill::Move => {
             for (pos, dir) in self.move_option(*id) {
               targets.push(Target::new_move(pos, dir))
@@ -97,8 +117,6 @@ impl Board {
       set,
     }
   }
-
-  
 
   
 }

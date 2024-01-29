@@ -95,8 +95,8 @@ impl Board {
         // 等待
         for id in &ids {
           self.id2pawn_mut(*id).unit_mut().to_wait();
-          self.after_wait();
         }
+        self.after_wait();
       }
     } else {
       // 进入结束阶段
