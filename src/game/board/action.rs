@@ -92,7 +92,7 @@ impl Board {
       let mut target = self.pos2pawn_try(pos + step * q);
       let mut block = false;
       while let Some(pawn) = target {
-        if pawn.team() != team && pawn.unit().can_block() {
+        if pawn.team() != team && pawn.unit().can_block(dir) {
           // 本目标发生阻挡
           lists[index].push(
             Scan {

@@ -7,7 +7,7 @@ impl Unit {
   
   pub fn punch_ability(&self) -> AttackInput {
     // 攻击力=力量
-    let atk = self.str();
+    let atk = self.str() + 5;
     // 命中，技术相关，取决于移动能力
     let acc = ((75. + self.skl() as f64 * 5.) * self.bound.move_coef()) as i32;
     // 穿透，技术相关，取决于移动能力
@@ -42,7 +42,7 @@ impl Unit {
 
   // &mut 函数
   pub fn be_attack_exe(&mut self, result : &AttackResult) {
-    // 潜质
+    // 干扰
     self.pose.pin_exe();
     // 造成伤害
     self.state.hurt_exe(result.dmg());

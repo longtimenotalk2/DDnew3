@@ -28,9 +28,14 @@ impl Unit {
     self.state.is_able() && self.pose.is_stand() && self.bound.is_lower_able()
   }
 
-  pub fn can_block(&self) -> bool {
+  pub fn can_block(&self, move_dir : Dir) -> bool {
     // 阻挡的条件，可以移动，且不能处于pin或者正在捆绑的状态
-    self.can_move() && !self.pose.is_pin() && !self.pose.is_tieing()
+    if self.can_move() && !self.pose.is_pin() && !self.pose.is_tieing() {
+      if let Some(dir) = self.pose.dir() {
+        return dir != move_dir
+      } 
+    }
+    false
   }
 
   fn can_punch(&self) -> bool {

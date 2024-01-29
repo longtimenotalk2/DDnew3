@@ -77,7 +77,7 @@ impl PawnShowList {
       if self.is_tieing {
         "捆"
       } else if self.is_pin {
-        "牵"
+        "扰"
       } else {
         "  "
       }

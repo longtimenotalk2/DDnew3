@@ -15,7 +15,7 @@ fn test_team() {
   let small2 = Unit::new("小弟乙", 12, 12, 12, Dir::Left);
   let small3 = Unit::new("小弟丙", 12, 12, 12, Dir::Left);
   
-  let mut board = Board::new(vec![(noel, 0),(elis, 0), (alyssa, 0), (yelin, 0),  (boss, 1), (small1, 1), (small2, 1),(small3, 1)], Dice50::new());
+  let mut board = Board::new(vec![(noel, 0),(elis, 0), (alyssa, 0), (yelin, 0),  (boss, 1), (small1, 1), (small2, 1),(small3, 1)], DiceWy::new(114514));
   // board.show();
   // dbg!(board.scan(6));
 
