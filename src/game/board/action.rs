@@ -5,6 +5,38 @@ use super::super::board::Board;
 use crate::game::common::*;
 
 impl Board {
+  // 捆绑
+  pub fn tie_option(&self, id : Id, can_move : bool) -> Vec<(Pos, Dir)> {
+    let mut list = Vec::new();
+    for scan in self.scan(id) {
+      if scan.is_enemy && scan.can_touch {
+        if can_move || scan.dis <= 1 {
+          let tar = self.pos2pawn(scan.pos).unit();
+          if tar.can_be_tie() {
+            list.push((scan.pos, scan.dir.unwrap()))
+          }
+        }
+      }
+    }
+    list
+  }
+
+  pub fn tie_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
+    let actor = self.id2pawn_mut(id).unit_mut();
+    actor.when_tieing();
+    let rope = actor.tie_ability();
+    let target_id = self.pos2id(pos);
+    self.id2pawn_mut(target_id).unit_mut().be_tie_exe(rope);
+    
+    // 移动
+    let pos_new = match dir {
+      Dir::Left => pos + 1,
+      Dir::Right => pos - 1,
+    };
+    self.move_exe(id, pos_new, dir)
+  }
+  
+  
   // 近战攻击
   pub fn melee_option(&self, id : Id, can_move : bool) -> Vec<(Pos, Dir)> {
     let mut list = Vec::new();

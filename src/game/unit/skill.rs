@@ -8,6 +8,7 @@ impl Unit {
   pub fn can_skill(&self, skill : Skill) -> bool {
     match skill {
       Skill::Punch => self.can_punch(),
+      Skill::Tie => self.can_tie(),
       Skill::Move => self.can_move(),
       Skill::Pass => true,
     }
@@ -42,6 +43,18 @@ impl Unit {
     // 挥拳的条件，清醒，站立，且上半身没有被捆绑
     self.state.is_able() && self.pose.is_stand() && self.bound.is_upper_able()
   }
-  
+
+  fn can_tie(&self) -> bool {
+    // 捆绑的条件，清醒，站立，且上半身没有被捆绑
+    self.state.is_able() && self.pose.is_stand() && self.bound.is_upper_able()
+  }
+
+  pub fn can_be_tie(&self) -> bool {
+    // 能被绑的条件：处于昏迷状态，且有部分没被绑
+    if self.bound.is_full() {
+      return false;
+    }
+    !self.state.is_able()
+  }
 }
 

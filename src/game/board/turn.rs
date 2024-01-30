@@ -24,6 +24,11 @@ impl Board {
         let dir = tgt.dir().unwrap();
         self.punch_exe(id, pos, dir);
       },
+      Skill::Tie => {
+        let pos = tgt.pos().unwrap();
+        let dir = tgt.dir().unwrap();
+        self.tie_exe(id, pos, dir);
+      },
       _ => unreachable!(),
     }
   }

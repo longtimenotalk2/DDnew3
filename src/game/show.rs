@@ -2,7 +2,7 @@
 
 const RED : &str = "\u{1b}[31m";
 const GREEN : &str = "\u{1b}[32m";
-// const YELLOW : &str = "\u{1b}[33m";
+const YELLOW : &str = "\u{1b}[33m";
 const BLUE : &str = "\u{1b}[34m";
 const RESET : &str = "\u{1b}[m";
 
@@ -34,8 +34,10 @@ struct PawnShowList {
   is_ctrled : bool,
   is_stun : bool,
   stun_turn : i32,
-  bound_upper : BoundUpper,
-  bound_lower : BoundLower,
+  wrist : BoundState,
+  arm : BoundState,
+  leg : BoundState,
+  lock : BoundState,
   str : i32,
   skl : i32,
   spd : i32,
@@ -91,24 +93,41 @@ impl PawnShowList {
     line += &state;
 
     // 绳索
-    line += " ";
-    line += match self.bound_upper {
-      BoundUpper::None => "  ",
-      BoundUpper::Wrist => "腕",
-      BoundUpper::Full => "臂",
-    };
-    line += match self.bound_lower {
-      BoundLower::None => "  ",
-      BoundLower::Leg => "腿",
-      BoundLower::Lock => "锁",
-    };
-    line += " ";
+    let mut arm = "臂".to_string();
+    match self.arm {
+      BoundState::None => arm = "  ".to_string(),
+      BoundState::Full => (),
+      BoundState::Tieing => arm = add_color(&arm, RED),
+      BoundState::Loose => arm = add_color(&arm, YELLOW),
+    }
+    let mut wrist = "腕".to_string();
+    match self.wrist {
+      BoundState::None => wrist = "  ".to_string(),
+      BoundState::Full => (),
+      BoundState::Tieing => wrist = add_color(&wrist, RED),
+      BoundState::Loose => wrist = add_color(&wrist, YELLOW),
+    }
+    let mut leg = "腿".to_string();
+    match self.leg {
+      BoundState::None => leg = "  ".to_string(),
+      BoundState::Full => (),
+      BoundState::Tieing => leg = add_color(&leg, RED),
+      BoundState::Loose => leg = add_color(&leg, YELLOW),
+    }
+    let mut lock = "锁".to_string();
+    match self.lock {
+      BoundState::None => lock = "  ".to_string(),
+      BoundState::Full => (),
+      BoundState::Tieing => lock = add_color(&lock, RED),
+      BoundState::Loose => lock = add_color(&lock, YELLOW),
+    }
+    line += &format!(" {arm}{wrist}{leg}{lock}");
 
     // 力、技、速
-    line += &format!("(力{:2} 技{:2} 速{:2})", self.str, self.skl, self.spd);
+    line += &format!("(力{:2}技{:2}速{:2})", self.str, self.skl, self.spd);
 
     // 受伤
-    line += &format!(" 伤{:2}", self.hurt);
+    line += &format!("伤{:2}", self.hurt);
     
     
     // 输出
@@ -129,7 +148,8 @@ impl Board {
         "|"
       } else {" "};
       // 位置
-      print!("{i}{m} ");
+      let p = pos2string(i as Pos);
+      print!("{p}{m} ");
         pawn.show_list().show_one_line();
     }
   }
@@ -147,20 +167,10 @@ impl Pawn {
     let is_ctrled = unit.is_ctrled();
     let is_stun = unit.is_stun();
     let stun_turn = unit.stun_turn();
-    let bound_upper = if unit.is_arm_bound() {
-      BoundUpper::Full
-    } else if unit.is_wrist_bound() {
-      BoundUpper::Wrist
-    } else {
-      BoundUpper::None
-    };
-    let bound_lower = if unit.is_lock_bound() {
-      BoundLower::Lock
-    } else if unit.is_leg_bound() {
-      BoundLower::Leg
-    } else {
-      BoundLower::None
-    };
+    let arm = unit.bound_part_state(BoundPart::Arm);
+    let wrist = unit.bound_part_state(BoundPart::Wrist);
+    let leg = unit.bound_part_state(BoundPart::Leg);
+    let lock = unit.bound_part_state(BoundPart::Lock);
     let str = unit.str();
     let skl = unit.skl();
     let spd = unit.spd();
@@ -177,8 +187,10 @@ impl Pawn {
       is_ctrled,
       is_stun,
       stun_turn,
-      bound_upper,
-      bound_lower,
+      arm,
+      wrist,
+      leg,
+      lock,
       str,
       skl,
       spd,

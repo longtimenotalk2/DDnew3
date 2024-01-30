@@ -70,6 +70,10 @@ impl Board {
           let txt = format!("{name} ({})", analyse.to_string());
           options.push(txt);
         }
+        Skill::Tie => {
+          let name = self.pos2pawn(target.pos().unwrap()).unit().name.clone();
+          options.push(name);
+        }
         Skill::Move => 
       options.push(target.to_string()),
         _ => options.push("无目标".to_string()),
@@ -97,7 +101,13 @@ impl Board {
             for (pos, dir) in self.melee_option(*id, can_move) {
               targets.push(Target::new_attack(pos, dir))
             }
-          }
+          },
+          Skill::Tie => {
+            let can_move = pawn.unit().can_move();
+            for (pos, dir) in self.tie_option(*id, can_move) {
+              targets.push(Target::new_attack(pos, dir))
+            }
+          },
           Skill::Move => {
             for (pos, dir) in self.move_option(*id) {
               targets.push(Target::new_move(pos, dir))
@@ -106,6 +116,7 @@ impl Board {
           Skill::Pass => {
             targets.push(Target::empty())
           },
+          _ => unreachable!(),
         }
         sklset.insert(skl, targets);
       }

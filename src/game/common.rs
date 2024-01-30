@@ -1,6 +1,7 @@
 // 全局开关
 pub const SHOW_BATTLE_EXPECT : u32 = 1;
 pub const SHOW_BATTLE_DETAIL : u32 = 1;
+pub const SHOW_TIE_DETAIL : u32 = 1;
 
 // 类型
 pub type Id = u32;
@@ -130,7 +131,7 @@ impl Target {
   }
 
   pub fn to_string(&self) -> String {
-    format!("{}位置{}", self.dir.unwrap().to_string(), self.pos.unwrap())
+    format!("{}位置{}", self.dir.unwrap().to_string(), pos2string(self.pos.unwrap()))
   }
 
   pub fn pos(&self) -> Option<Pos> {
@@ -163,6 +164,7 @@ impl Dir {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Skill {
   Punch,
+  Tie,
   Move,
   Pass,
 }
@@ -171,6 +173,7 @@ impl Skill {
   pub fn iter() -> impl Iterator<Item = Self> {
     [
       Self::Punch,
+      Self::Tie,
       Self::Move, 
       Self::Pass,
     ].iter().cloned()
@@ -189,9 +192,41 @@ impl Skill {
   pub fn to_string(&self) -> String {
     match self {
       Self::Punch => "挥拳",
+      Self::Tie => "捆绑",
       Self::Move => "移动",
       Self::Pass => "略过",
     }.to_string()
+  }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum BoundState {
+  None,
+  Full,
+  Tieing,
+  Loose,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum BoundPart {
+  Wrist,
+  Arm,
+  Leg,
+  Lock,
+}
+
+impl BoundPart {
+  pub fn tie_order() -> Vec<Self> {
+    vec!(Self::Wrist, Self::Leg, Self::Arm, Self::Lock)
+  }
+
+  pub fn to_string(&self) -> String {
+    match self {
+      Self::Wrist => "腕".to_string(),
+      Self::Arm => "臂".to_string(),
+      Self::Leg => "腿".to_string(),
+      Self::Lock => "锁".to_string(),
+    }
   }
 }
 
@@ -210,6 +245,13 @@ pub fn i2pro(i : i32) -> i32 {
 
 pub fn i2dmg(i : i32) -> i32 {
   i.max(1)
+}
+
+pub fn pos2string(pos : Pos) -> String {
+  let l = "ABCDEFGHIJKLMN";
+  // 取出l中第pos个字符
+  l.chars().nth(pos as usize).unwrap().to_string()
+  
 }
 
 // 接口
