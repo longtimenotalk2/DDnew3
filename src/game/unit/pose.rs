@@ -8,6 +8,8 @@ pub struct Pose {
   pin : bool, // 仅站立时才有牵制
   tieing : bool, // 仅站立时，正在捆绑别人
   ctrled : bool, // 仅倒地时，被人控制中
+  tieing_id : Option<Id>,
+  ctrled_id : Option<Id>,
 }
 
 impl Pose {
@@ -18,6 +20,8 @@ impl Pose {
       pin: false,
       tieing : false,
       ctrled : false,
+      tieing_id : None,
+      ctrled_id : None,
     }
   }
 
@@ -117,9 +121,39 @@ impl Unit {
   pub fn is_ctrled(&self) -> bool {
     self.pose.is_ctrled()
   }
+
+  pub fn tieing_id(&self) -> Option<Id> {
+    self.pose.tieing_id
+  }
+
+  pub fn ctrled_id(&self) -> Option<Id> {
+    self.pose.ctrled_id
+  }
   
   // 变动
   pub fn set_dir(&mut self, dir : Dir) {
     self.pose.dir = Some(dir);
   }
+
+  pub fn start_tieing_to(&mut self, id : Id) {
+    self.pose.tieing = true;
+    self.pose.tieing_id = Some(id);
+  }
+
+  pub fn start_be_tied(&mut self, id : Id) {
+    self.pose.ctrled = true;
+    self.pose.ctrled_id = Some(id);
+  }
+  
+  pub fn cancel_tieing(&mut self) -> Id {
+    let id = self.pose.tieing_id.take().unwrap();
+    self.pose.tieing = false;
+    id
+  }
+  pub fn cancel_be_tied(&mut self) -> Id {
+    let id = self.pose.ctrled_id.take().unwrap();
+    self.pose.ctrled = false;
+    id
+  }
+
 }

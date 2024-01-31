@@ -50,11 +50,11 @@ impl Unit {
   }
 
   pub fn can_be_tie(&self) -> bool {
-    // 能被绑的条件：处于昏迷状态，且有部分没被绑
+    // 能被绑的条件：处于倒地状态，且有部分没被绑
     if self.bound.is_full() {
       return false;
     }
-    !self.state.is_able()
+    !self.pose.is_stand()
   }
 }
 

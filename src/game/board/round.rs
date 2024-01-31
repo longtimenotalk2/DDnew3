@@ -61,6 +61,17 @@ impl Board {
   }
 
   fn end(&mut self) {
+    // 捆绑
+    for i in 0..self.pawns.len() {
+      let pawn = self.pawns.get(i).unwrap();
+      let unit = pawn.unit();
+      if let Some(id) = unit.ctrled_id() {
+        let rope = self.id2pawn(id).unit().tie_ability();
+        let pawn = self.pawns.get_mut(i).unwrap();
+        let unit = pawn.unit_mut();
+        unit.be_tie_exe(rope);
+      }
+    }
     self.round.phase = Phase::Start;
     self.round.team_now = None;
     self.round.ap = None;

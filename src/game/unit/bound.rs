@@ -176,8 +176,4 @@ impl Unit {
   pub fn be_tie_exe(&mut self, rope : i32) {
     self.bound.tie_main(rope);
   }
-
-  pub fn when_tieing(&mut self) {
-    self.pose.pin_exe();
-  }
 }

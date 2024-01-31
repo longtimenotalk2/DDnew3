@@ -22,11 +22,16 @@ impl Board {
   }
 
   pub fn tie_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
-    let actor = self.id2pawn_mut(id).unit_mut();
-    actor.when_tieing();
-    let rope = actor.tie_ability();
     let target_id = self.pos2id(pos);
-    self.id2pawn_mut(target_id).unit_mut().be_tie_exe(rope);
+    // 如已经被控，解除
+    if let Some(id) = self.id2pawn(target_id).unit().ctrled_id() {
+      self.cancel_ctrl_force(id);
+    }
+    let actor = self.id2pawn_mut(id).unit_mut();
+    actor.start_tieing_to(target_id);
+    
+    let tar = self.id2pawn_mut(target_id).unit_mut();
+    tar.start_be_tied(id);
     
     // 移动
     let pos_new = match dir {
@@ -63,6 +68,8 @@ impl Board {
     }
     let target_id = self.pos2id(pos);
     self.id2pawn_mut(target_id).unit_mut().be_attack_exe(&result);
+    // 目标失去控制检测
+    self.cancel_ctrl_check(target_id);
     // 移动
     let pos_new = match dir {
       Dir::Left => pos + 1,
@@ -83,13 +90,46 @@ impl Board {
   }
 
   pub fn move_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
+    let tar_id = self.pos2id(pos);
+    self.move_pawn(id, pos, Some(dir));
+    // 被替换的棋子拉回受控角色
+    let tar_unit = self.id2pawn(tar_id).unit();
+    let pair_id = if let Some(ctrled_id) = tar_unit.tieing_id() {
+      Some(ctrled_id)
+    } else if let Some(tieing_id) = tar_unit.ctrled_id() {
+      Some(tieing_id)
+    } else {
+      None
+    };
+    if let Some(_) = pair_id {
+      self.move_pawn(tar_id, pos, None);
+    }
+  }
+
+  // 被动行动
+  fn move_pawn(&mut self, id : Id, pos : Pos, dir : Option<Dir>) {
     let pos_o = self.id2pos(id);
     let mut pawn = self.pawns.remove(pos_o as usize);
-    pawn.unit_mut().set_dir(dir);
+    if let Some(dir) = dir {
+      pawn.unit_mut().set_dir(dir);
+    }
     let index_new = pos as usize;
     self.pawns.insert(index_new, pawn);
   }
 
+  fn cancel_ctrl_check(&mut self, id : Id) {
+    let unit = self.id2pawn(id).unit();
+    if unit.is_tieing() && !unit.can_skill(Skill::Tie) {
+      self.cancel_ctrl_force(id);
+    }
+  }
+  
+  fn cancel_ctrl_force(&mut self, id : Id) {
+    let unit = self.id2pawn_mut(id).unit_mut();
+    let id2 = unit.cancel_tieing();
+    let unit2 = self.id2pawn_mut(id2).unit_mut();
+    unit2.cancel_be_tied();
+  }
   
 }
 
@@ -102,8 +142,9 @@ pub struct Scan {
   is_self : bool,
   is_friend : bool,
   is_enemy : bool,
-  can_move : bool,
-  can_touch : bool,
+  can_move : bool, // 可以移动到此
+  can_touch : bool, // 近距离可接触目标
+  is_ctrled : bool,  
 }
 
 impl Board {
@@ -123,7 +164,13 @@ impl Board {
       let mut step = 1;
       let mut target = self.pos2pawn_try(pos + step * q);
       let mut block = false;
+      let mut ctrl_pair = false;
       while let Some(pawn) = target {
+        // 如果处于控制对状态，变化ctrl pair
+        if pawn.unit().is_ctrled() || pawn.unit().is_tieing() {
+          ctrl_pair = !ctrl_pair;
+        }
+        let is_ctrled = pawn.unit().is_ctrled();
         if pawn.team() != team && pawn.unit().can_block(dir) {
           // 本目标发生阻挡
           lists[index].push(
@@ -136,11 +183,13 @@ impl Board {
               is_enemy : pawn.team() != team,
               can_move : false,
               can_touch : !block,
+              is_ctrled,
             }
           );
           block = true;
         } else {
           // 本目标未发生阻挡
+          
           lists[index].push(
             Scan {
               pos : (pos + step * q) as Pos,
@@ -149,8 +198,9 @@ impl Board {
               is_self : false,
               is_friend : pawn.team() == team,
               is_enemy : pawn.team() != team,
-              can_move : !block,
+              can_move : !block && !ctrl_pair,
               can_touch : !block,
+              is_ctrled,
             }
           );
         }
@@ -172,6 +222,7 @@ impl Board {
         is_enemy : false,
         can_move : true,
         can_touch : true,
+        is_ctrled : false,
       }
     );
     lists
