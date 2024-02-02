@@ -22,6 +22,8 @@ impl Board {
   }
 
   pub fn tie_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
+    // 取消控制
+    self.cancel_ctrl_try(id);
     let target_id = self.pos2id(pos);
     // 如已经被控，解除
     if let Some(id) = self.id2pawn(target_id).unit().ctrled_id() {
@@ -56,6 +58,8 @@ impl Board {
   }
 
   pub fn punch_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
+    // 取消控制
+    self.cancel_ctrl_try(id);
     // 攻击部分
     let atk_input = self.id2pawn(id).unit().punch_ability();
     let analyse = self.pos2pawn(pos).unit().be_attack_analyse(dir, &atk_input);
@@ -81,15 +85,25 @@ impl Board {
   // 移动
   pub fn move_option(&self, id : Id) -> Vec<(Pos, Dir)> {
     let mut list = Vec::new();
+    let actor = self.id2pawn(id).unit();
+    let tie_id = actor.tieing_id();
     for scan in self.scan(id) {
-      if !scan.is_self && scan.can_move {
+      if (!scan.is_self && scan.can_move) || tie_id.is_some_and(|p| p == self.pos2id(scan.pos)) {
         list.push((scan.pos, scan.dir.unwrap()))
       }
     }
     list
   }
 
-  pub fn move_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
+  // 移动行动
+  pub fn move_action_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
+    // 取消控制
+    self.cancel_ctrl_try(id);
+    self.move_exe(id, pos, dir)
+  }
+
+  // 行动附带的移动阶段
+  fn move_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
     let tar_id = self.pos2id(pos);
     self.move_pawn(id, pos, Some(dir));
     // 被替换的棋子拉回受控角色
@@ -101,12 +115,15 @@ impl Board {
     } else {
       None
     };
-    if let Some(_) = pair_id {
-      self.move_pawn(tar_id, pos, None);
+    if let Some(pair_id) = pair_id {
+      if (self.id2pos(pair_id) - self.id2pos(tar_id)).abs() > 1 {
+        self.move_pawn(tar_id, pos, None);
+      }
     }
   }
 
   // 被动行动
+  // 元移动棋子
   fn move_pawn(&mut self, id : Id, pos : Pos, dir : Option<Dir>) {
     let pos_o = self.id2pos(id);
     let mut pawn = self.pawns.remove(pos_o as usize);
@@ -117,6 +134,15 @@ impl Board {
     self.pawns.insert(index_new, pawn);
   }
 
+  // 取消捆绑尝试
+  fn cancel_ctrl_try(&mut self, id : Id) {
+    let unit = self.id2pawn(id).unit();
+    if unit.is_tieing() {
+      self.cancel_ctrl_force(id);
+    }
+  }
+
+  // 检查是否已经无能力捆绑
   fn cancel_ctrl_check(&mut self, id : Id) {
     let unit = self.id2pawn(id).unit();
     if unit.is_tieing() && !unit.can_skill(Skill::Tie) {

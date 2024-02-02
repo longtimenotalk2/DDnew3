@@ -31,6 +31,10 @@ impl Bound {
     !self.leg
   }
 
+  pub fn can_stand(&self) -> bool {
+    !self.wrist || !self.leg
+  }
+
   // 定量影响
   pub fn move_coef(&self) -> f64 {
     let mut c = 1.0;
@@ -39,6 +43,23 @@ impl Bound {
     if self.leg {c *= 0.5}
     if self.lock {c *= 0.0}
     c
+  }
+
+  fn struggle_part_coef(&self, part : BoundPart) -> f64 {
+    match part {
+      BoundPart::Wrist => {
+        1.0 + (100. - self.part_tightness(part) as f64) * 0.01
+      },
+      BoundPart::Arm => {
+        0.5 + (100. - self.part_tightness(part) as f64) * 0.005
+      },
+      BoundPart::Leg => {
+        0.5 + (100. - self.part_tightness(part) as f64) * 0.005
+      },
+      BoundPart::Lock => {
+        (100.0 - self.part_tightness(part) as f64) * 0.005
+      },
+    }
   }
 
   // 索引
@@ -58,6 +79,15 @@ impl Bound {
       BoundPart::Arm => &mut self.arm,
       BoundPart::Leg => &mut self.leg,
       BoundPart::Lock => &mut self.lock,
+    }
+  }
+
+  fn part_tightness(&self, part : BoundPart) -> i32 {
+    match part {
+      BoundPart::Wrist => self.wrist_tightness,
+      BoundPart::Arm => self.arm_tightness,
+      BoundPart::Leg => self.leg_tightness,
+      BoundPart::Lock => self.lock_tightness,
     }
   }
 
@@ -144,8 +174,51 @@ impl Bound {
     }
   }
 
-  
-    
+  fn struggle_part(&mut self, part : BoundPart, rope: &mut i32) {
+    use BoundState::*;
+    let coef = self.struggle_part_coef(part);
+    match self.part_state(part) {
+      None => (),
+      Tieing => {
+        *self.part_process_mut(part) = 0;
+      },
+      _ => {
+        let t = self.part_tightness_mut(part);
+        let start = *t;
+        let rope_r = (*rope as f64 * coef).floor() as i32;
+        *t = *t - rope_r;
+        if *t > 0 {
+          *rope = 0;
+        } else {
+          *rope = (-*t as f64 * coef).floor() as i32;
+          *t = 0;
+          *self.part_is_mut(part) = false;
+        }
+        let end = self.part_tightness(part);
+        if SHOW_TIE_DETAIL == 1 {
+          println!("挣脱 {} 部: {start} -> {end}", part.to_string());
+        }
+      },
+    }
+  }
+
+  pub fn struggle_main(&mut self, mut rope : i32) {
+    // 首先，如果臂没被捆，则先挣脱腕
+    if self.part_state(BoundPart::Arm) == BoundState::None {
+      self.struggle_part(BoundPart::Wrist, &mut rope);
+    }
+    // 根据顺序依次挣脱
+    for part in BoundPart::struggle_order() {
+      if rope > 0 {
+        self.struggle_part(part, &mut rope);
+      }
+    }
+    // 如手腕已解绑，立即解绑腿部
+    if self.part_state(BoundPart::Wrist) == BoundState::None {
+      let mut rope = 10000;
+      self.struggle_part(BoundPart::Leg, &mut rope);
+    }
+  }
 }
 
 fn state(is : bool, process : i32, tightness : i32) -> BoundState {

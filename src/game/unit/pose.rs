@@ -10,6 +10,7 @@ pub struct Pose {
   ctrled : bool, // 仅倒地时，被人控制中
   tieing_id : Option<Id>,
   ctrled_id : Option<Id>,
+  history_dir : Option<Dir>, 
 }
 
 impl Pose {
@@ -22,6 +23,7 @@ impl Pose {
       ctrled : false,
       tieing_id : None,
       ctrled_id : None,
+      history_dir : None,
     }
   }
 
@@ -88,8 +90,20 @@ impl Pose {
   // 变动
 
   pub fn fall_exe(&mut self) {
-    self.stand = false;
-    self.dir = None;
+    if self.stand {
+      self.stand = false;
+      self.history_dir = self.dir;
+      self.dir = None;
+    }
+  }
+
+  pub fn stand_exe(&mut self) {
+    if !self.stand {
+      self.dir = self.history_dir;
+      self.history_dir = None;
+      self.stand = true;
+      
+    }
   }
   
   pub fn pin_exe(&mut self) {

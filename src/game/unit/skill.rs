@@ -56,5 +56,10 @@ impl Unit {
     }
     !self.pose.is_stand()
   }
+
+  pub fn can_struggle(&self) -> bool {
+    // 挣脱条件，没晕且没被控
+    self.state.is_able() && !self.pose.is_ctrled()
+  }
 }
 

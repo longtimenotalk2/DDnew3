@@ -92,16 +92,27 @@ impl Board {
       // 处理这些角色的选择（在select mod）
       let can_wait = self.can_wait();
       let selected = self.turn_select(&ids, can_wait);
-      if let Some((id, skl, tgt)) = selected {
-        // 执行技能
-        self.turn_main(id, skl, tgt);
-        self.after_turn();
-      } else {
-        // 等待
-        for id in &ids {
-          self.id2pawn_mut(*id).unit_mut().to_wait();
-        }
-        self.after_wait();
+      use super::select::Selection;
+      match selected {
+        Selection::Normal(id, skl, tgt) => {
+          // 执行技能
+          self.turn_main(id, skl, tgt);
+          self.after_turn();
+        },
+        Selection::Wait => {
+          // 等待
+          for id in &ids {
+            self.id2pawn_mut(*id).unit_mut().to_wait();
+          }
+          self.after_wait();
+        },
+        Selection::AllPass => {
+          // 全部略过
+          for id in &ids {
+            self.id2pawn_mut(*id).unit_mut().consume_action();
+          }
+          self.after_turn();
+        },
       }
     } else {
       // 进入结束阶段
@@ -200,8 +211,19 @@ impl Board {
   }
 
   fn can_wait(&self) -> bool {
-    // 可以等待条件：我方所有可动角色并非都在等待
+    // 可以等待条件：我方所有可动角色并非都在等待，且对方有人可动
     let team = self.round.team_now.unwrap();
+    
+    let mut oppo_has = false;
+    let team_o = 1 - team;
+    for pawn in self.pawns.iter() {
+      if pawn.team() == team_o && pawn.unit().is_action() {
+        oppo_has = true;
+        break;
+      }
+    }
+    if !oppo_has {return false;}
+    
     for pawn in self.pawns() {
       if pawn.team() == team && pawn.unit().is_action() && !pawn.unit().is_wait(){
         return true;

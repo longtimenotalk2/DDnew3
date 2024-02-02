@@ -8,8 +8,19 @@ impl Unit {
     self.state.stun_restore();
     // 生命恢复
     self.state.hurt_restore();
-    // 行动状态恢复
-    self.state.action_restore();
+    // 挣脱捆绑
+    if self.can_struggle() {
+      let rope = self.str() * 10;
+      self.bound.struggle_main(rope);
+    }
+    // 起身（清醒，没被控，束缚状态允许起身）
+    if self.state.is_able() && !self.is_ctrled() && self.bound.can_stand() {
+      self.pose.stand_exe()
+    }
+    // 行动状态恢复 (清醒，没被控)
+    if self.state.is_able() && !self.is_ctrled() {
+      self.state.restore_action();
+    }
   }
   
   // 处理角色行动前的变动

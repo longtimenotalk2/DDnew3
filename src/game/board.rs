@@ -16,22 +16,22 @@ pub struct Board {
 }
 
 impl Board {
-  pub fn new(data : Vec<(Unit, Team)>, dice : impl Dice + 'static) -> Self {
-    let mut pawns = Vec::new();
-    let mut id : Id = 0;
-    for (unit, team) in data {
-      pawns.push(Pawn::new(
-        unit,
-        id,
-        team,
-      ));
-      id += 1;
-    }
+  pub fn new(dice : impl Dice + 'static) -> Self {
+    
     Board {
-      pawns,
+      pawns : vec!(),
       round : Round::new(),
       dice : Box::new(dice),
     }
+  }
+
+  pub fn insert_unit(&mut self, unit : Unit, team : Team) {
+    let index = self.pawns.len() as u32;
+    self.pawns.push(Pawn::new(
+      unit,
+      index,
+      team,
+    ));
   }
 
   // 外部函数

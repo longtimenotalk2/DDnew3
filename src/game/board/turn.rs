@@ -17,7 +17,7 @@ impl Board {
       Skill::Move => {
         let pos = tgt.pos().unwrap();
         let dir = tgt.dir().unwrap();
-        self.move_exe(id, pos, dir);
+        self.move_action_exe(id, pos, dir);
       },
       Skill::Punch => {
         let pos = tgt.pos().unwrap();

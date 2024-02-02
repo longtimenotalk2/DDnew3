@@ -42,6 +42,10 @@ impl State {
   }
 
   // 变动
+  pub fn restore_action(&mut self) {
+    self.action = true;
+  }
+  
   pub fn hurt_exe(&mut self, hurt : i32) {
     self.hurt += hurt;
   }
@@ -70,12 +74,6 @@ impl State {
     // 回复值为受伤开平方
     let heal = (self.hurt as f64).sqrt().floor() as i32;
     self.hurt -= heal;
-  }
-
-  pub fn action_restore(&mut self) {
-    if self.stun.is_none() {
-      self.action = true;
-    }
   }
 
 }

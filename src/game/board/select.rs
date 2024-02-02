@@ -11,7 +11,11 @@ use std::collections::HashMap;
 
 // 选择分3步：选人，选技能，选目标（Option<Pos>）
 
-
+pub enum Selection {
+  Wait,
+  AllPass,
+  Normal(Id, Skill, Target),
+}
 
 struct SelectSet {
   set : HashMap<Id, HashMap<Skill, Vec<Target>>>,
@@ -29,18 +33,22 @@ impl SelectSet {
 }
 
 impl Board {
-  pub fn turn_select(&self, ids : &[Id], can_wait : bool) -> Option<(Id, Skill, Target)> {
+  pub fn turn_select(&self, ids : &[Id], can_wait : bool) -> Selection {
     let set = self.select_set(ids);
     // 选择角色或者等待
     let mut options : Vec<String> = ids.iter().map(|id| self.id2pawn(*id).unit().name.clone()).collect();
+    options.push("全部略过".to_string());
     if can_wait {
       options.push("等待".to_string());
     }
     let index = io("请选择希望行动的角色：".to_string(), &options, None);
-    if index == ids.len() {
+    if index == ids.len() + 1 {
       // 执行了等待
-      return None
-    }
+      return Selection::Wait;
+    } else if index == ids.len() {
+      // 执行了全部略过
+      return Selection::AllPass;
+    } 
     let id = ids[index];
 
     // 选择技能
@@ -83,7 +91,7 @@ impl Board {
     let index = io(title, &options, None);
     let target = targets[index].clone();
 
-    Some((id, skill, target))
+    Selection::Normal(id, skill, target)
   }
   
   // 根据可动角色，生成完整的SelectSet

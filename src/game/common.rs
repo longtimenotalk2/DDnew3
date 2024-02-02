@@ -220,6 +220,10 @@ impl BoundPart {
     vec!(Self::Wrist, Self::Leg, Self::Arm, Self::Lock)
   }
 
+  pub fn struggle_order() -> Vec<Self> {
+    vec!(Self::Lock, Self::Leg, Self::Arm, Self::Wrist)
+  }
+
   pub fn to_string(&self) -> String {
     match self {
       Self::Wrist => "腕".to_string(),
