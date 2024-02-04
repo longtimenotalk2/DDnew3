@@ -9,7 +9,10 @@ impl Unit {
     // 生命恢复
     self.state.hurt_restore();
     // 挣脱捆绑
-    if self.can_struggle() {
+    if self.can_struggle() && self.bound.need_struggle() {
+      if SHOW_TIE_DETAIL == 1 {
+        println!("{} 挣脱捆绑 :", self.name);
+      }
       let rope = self.str() * 10;
       self.bound.struggle_main(rope);
     }

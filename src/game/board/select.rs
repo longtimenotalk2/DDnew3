@@ -81,9 +81,15 @@ impl Board {
         Skill::Tie => {
           let name = self.pos2pawn(target.pos().unwrap()).unit().name.clone();
           options.push(name);
-        }
+        },
+        Skill::Untie => {
+          let name = self.pos2pawn(target.pos().unwrap()).unit().name.clone();
+          options.push(name);
+        },
         Skill::Move => 
       options.push(target.to_string()),
+        Skill::MoveTurn => 
+      options.push(target.to_string_anti()),
         _ => options.push("无目标".to_string()),
       }
     }
@@ -116,7 +122,18 @@ impl Board {
               targets.push(Target::new_attack(pos, dir))
             }
           },
+          Skill::Untie => {
+            let can_move = pawn.unit().can_move();
+            for (pos, dir) in self.untie_option(*id, can_move) {
+              targets.push(Target::new_attack(pos, dir))
+            }
+          },
           Skill::Move => {
+            for (pos, dir) in self.move_option(*id) {
+              targets.push(Target::new_move(pos, dir))
+            }
+          },
+          Skill::MoveTurn => {
             for (pos, dir) in self.move_option(*id) {
               targets.push(Target::new_move(pos, dir))
             }
@@ -124,7 +141,6 @@ impl Board {
           Skill::Pass => {
             targets.push(Target::empty())
           },
-          _ => unreachable!(),
         }
         sklset.insert(skl, targets);
       }

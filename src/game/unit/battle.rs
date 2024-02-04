@@ -11,9 +11,9 @@ impl Unit {
     // 命中，技术相关，取决于移动能力
     let acc = ((75. + self.skl() as f64 * 5.) * self.bound.move_coef()) as i32;
     // 穿透，技术相关，取决于移动能力
-    let pir = ((150. + self.skl() as f64 * 5.) * self.bound.move_coef()) as i32;
+    let pir = ((75. + self.skl() as f64 * 5.) * self.bound.move_coef()) as i32;
     // 重击，技术相关，取决于移动能力
-    let whk = ((50. + self.skl() as f64 * 5.) * self.bound.move_coef()) as i32;
+    let whk = ((50. + self.skl() as f64 * 2.) * self.bound.move_coef()) as i32;
     
     AttackInput {
       atk,
@@ -34,22 +34,25 @@ impl Unit {
     let dmg_asd = i2dmg(input.atk - self.def());
     // 直击伤害 = 攻击 - 防御 / 2
     let dmg_stt = i2dmg(input.atk - self.def() / 2);
-    // 暴击伤害 = 攻击 
-    let dmg_cri = i2dmg(input.atk);
+    // 暴击伤害 = （攻击 - 防御 / 4）
+    let dmg_cri = i2dmg(input.atk - self.def() / 4);
     
     AttackAnalyse {hit, stt, cri, dmg_asd, dmg_stt, dmg_cri}
   }
 
   // &mut 函数
-  pub fn be_attack_exe(&mut self, result : &AttackResult) {
+  pub fn be_attack_exe(&mut self, result : &AttackResult, dir : Dir) {
     // 干扰
-    self.pose.pin_exe();
+    self.pose.pin_exe(dir);
     // 造成伤害
     self.state.hurt_exe(result.dmg());
     // 击晕
     if result.is_cri() {
       // 暴击击晕
       let n = self.be_attack_stun_turn(result.dmg());
+      if SHOW_BATTLE_DETAIL == 1 {
+        println!("击晕 {n} 回合！！");
+      }
       self.action_stun(n);
     }
   }
@@ -75,13 +78,13 @@ impl Unit {
   fn asd(&self, dir : Dir) -> i32 {
     // 格挡，技巧相关，取决于反应以及上半身可用
     if !self.state.is_able() || !self.bound.is_upper_able() {return 0;}
-    ((100. + self.skl() as f64 * 5.) * self.pose.react_coef(dir)) as i32
+    ((50. + self.skl() as f64 * 5.) * self.pose.react_coef(dir)) as i32
   }
 
   fn rfg(&self, dir : Dir) -> i32 {
     // 暴击回避，速度相关，取决于反应
     if !self.state.is_able() {return 0;}
-    ((50. + self.spd() as f64 * 5.) * self.pose.react_coef(dir)) as i32
+    ((50. + self.spd() as f64 * 2.) * self.pose.react_coef(dir)) as i32
   }
 
   fn stun_resist(&self) -> i32 {
@@ -90,7 +93,7 @@ impl Unit {
 
   fn be_attack_stun_turn(&self, dmg : i32) -> i32 {
     if dmg >= self.stun_resist() {
-      (dmg - self.stun_resist()) / 5 + 1
+      (dmg - self.stun_resist()) / 10 + 1
     } else {0}
   }
 

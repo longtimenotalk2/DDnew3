@@ -42,6 +42,38 @@ impl Board {
     };
     self.move_exe(id, pos_new, dir)
   }
+
+  // 解绑
+  pub fn untie_option(&self, id : Id, can_move : bool) -> Vec<(Pos, Dir)> {
+    let mut list = Vec::new();
+    for scan in self.scan(id) {
+      if scan.is_friend && scan.can_touch && !scan.is_ctrled {
+        if can_move || scan.dis <= 1 {
+          let tar = self.pos2pawn(scan.pos).unit();
+          if tar.can_be_untie() {
+            list.push((scan.pos, scan.dir.unwrap()))
+          }
+        }
+      }
+    }
+    list
+  }
+
+  pub fn untie_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
+    // 取消控制
+    self.cancel_ctrl_try(id);
+
+    // 直接开始解绑
+    let rope = self.id2pawn(id).unit().untie_ability();
+    self.id2pawn_mut(self.pos2id(pos)).unit_mut().be_untie_exe(rope);
+    
+    // 移动
+    let pos_new = match dir {
+      Dir::Left => pos + 1,
+      Dir::Right => pos - 1,
+    };
+    self.move_exe(id, pos_new, dir)
+  }
   
   
   // 近战攻击
@@ -71,7 +103,7 @@ impl Board {
       result.show();
     }
     let target_id = self.pos2id(pos);
-    self.id2pawn_mut(target_id).unit_mut().be_attack_exe(&result);
+    self.id2pawn_mut(target_id).unit_mut().be_attack_exe(&result, dir);
     // 目标失去控制检测
     self.cancel_ctrl_check(target_id);
     // 移动
@@ -88,7 +120,7 @@ impl Board {
     let actor = self.id2pawn(id).unit();
     let tie_id = actor.tieing_id();
     for scan in self.scan(id) {
-      if (!scan.is_self && scan.can_move) || tie_id.is_some_and(|p| p == self.pos2id(scan.pos)) {
+      if scan.can_move || tie_id.is_some_and (|p| p == self.pos2id(scan.pos)) {
         list.push((scan.pos, scan.dir.unwrap()))
       }
     }
@@ -100,6 +132,14 @@ impl Board {
     // 取消控制
     self.cancel_ctrl_try(id);
     self.move_exe(id, pos, dir)
+  }
+
+  pub fn move_turn_exe(self : &mut Self, id : Id, pos : Pos, dir : Dir) {
+    // 取消控制
+    self.cancel_ctrl_try(id);
+    self.move_exe(id, pos, dir);
+    // 转身
+    self.id2pawn_mut(id).unit_mut().turn_back();
   }
 
   // 行动附带的移动阶段
@@ -150,7 +190,7 @@ impl Board {
     }
   }
   
-  fn cancel_ctrl_force(&mut self, id : Id) {
+  pub fn cancel_ctrl_force(&mut self, id : Id) {
     let unit = self.id2pawn_mut(id).unit_mut();
     let id2 = unit.cancel_tieing();
     let unit2 = self.id2pawn_mut(id2).unit_mut();
@@ -242,7 +282,7 @@ impl Board {
       Scan {
         pos : pos,
         dis : 0,
-        dir : None,
+        dir : self.id2pawn(id).unit().dir(),
         is_self : true,
         is_friend : false,
         is_enemy : false,

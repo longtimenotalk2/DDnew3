@@ -61,14 +61,39 @@ impl Board {
   }
 
   fn end(&mut self) {
+    // 反控制
+    for i in 0..self.pawns.len() {
+      if let Some(tie_id) = self.pawns[i].unit().ctrled_id() { 
+        if self.pawns[i].unit().can_anti_ctrl() {
+          let force = self.id2pawn(tie_id).unit().ctrl_ability();
+          let pro = self.pawns[i].unit().anti_ctrl_pro(force);
+          let d100 = self.dice.d100();
+          let is = d100 <= pro;
+          if is {
+            self.cancel_ctrl_force(tie_id)
+          }
+          if SHOW_BATTLE_DETAIL == 1 {
+            let name_1 = &self.pawns[i].unit().name;
+            let name_2 = &self.id2pawn(tie_id).unit().name;
+            let istxt = if is { "成功" } else { "失败" };
+            println!("{name_1} 从 {name_2} 挣脱，{pro}%，{istxt}");
+          }
+        }
+      }
+    }
     // 捆绑
     for i in 0..self.pawns.len() {
       let pawn = self.pawns.get(i).unwrap();
       let unit = pawn.unit();
       if let Some(id) = unit.ctrled_id() {
         let rope = self.id2pawn(id).unit().tie_ability();
+        let name1 = self.id2pawn(id).unit().name.clone();
         let pawn = self.pawns.get_mut(i).unwrap();
         let unit = pawn.unit_mut();
+        let name2 = unit.name.clone();
+        if SHOW_BATTLE_DETAIL == 1 {
+          println!("{name1} 捆绑 {name2} :", );
+        }
         unit.be_tie_exe(rope);
       }
     }
@@ -109,7 +134,7 @@ impl Board {
         Selection::AllPass => {
           // 全部略过
           for id in &ids {
-            self.id2pawn_mut(*id).unit_mut().consume_action();
+            self.turn_main(*id, Skill::Pass, Target::empty());
           }
           self.after_turn();
         },

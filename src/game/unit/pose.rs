@@ -67,16 +67,23 @@ impl Pose {
 
   // 定量影响
   pub fn react_coef(&self, dir : Dir) -> f64 {
-    let mut c = 1.0;
-    if self.stand {
-      if self.is_backtrab(dir) == Some(true) {
-        c *= 0.7;
-        if self.is_pin() {
-          c *= 0.7;
-        }
+    if self.tieing {
+      return 0.5;
+    }
+    match self.is_backtrab(dir) {
+      Some(true) => {
+        // 对站立者背刺
+        if self.is_pin() {0.4} else {0.7}
+      },
+      Some(false) => {
+        // 正面对站立者
+        if self.is_pin() {0.8} else {1.0}
       }
-    } 
-    c
+      None => {
+        // 倒地情况
+        0.5
+      }
+    }
   }
 
   pub fn move_coef(&self) -> f64 {
@@ -106,13 +113,17 @@ impl Pose {
     }
   }
   
-  pub fn pin_exe(&mut self) {
-    self.pin = true;
+  pub fn pin_exe(&mut self, dir : Dir) {
+    if self.pin == false {
+      self.pin = true;
+      self.dir = Some(dir.anti());
+    }
   }
 
   pub fn pin_cancel(&mut self) {
     self.pin = false;
   }
+
 }
 
 impl Unit {
@@ -149,6 +160,12 @@ impl Unit {
     self.pose.dir = Some(dir);
   }
 
+  pub fn turn_back(&mut self) {
+    if let Some(dir) = self.pose.dir {
+      self.pose.dir = Some(dir.anti());
+    }
+  }
+
   pub fn start_tieing_to(&mut self, id : Id) {
     self.pose.tieing = true;
     self.pose.tieing_id = Some(id);
@@ -169,5 +186,10 @@ impl Unit {
     self.pose.ctrled = false;
     id
   }
+  pub fn fall_exe(&mut self) {
+    self.pose.fall_exe();
+  }
+
+
 
 }

@@ -40,7 +40,7 @@ impl Unit {
 
   // 定量能力值
   pub fn action_point(&self, fix : i32) -> Option<i32> {
-    if self.is_action() {
+    if self.is_action() && self.can_action_sense() {
       let action_point = 100 * self.spd() + fix;
       Some(action_point)
     } else {

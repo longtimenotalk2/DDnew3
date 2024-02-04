@@ -134,6 +134,10 @@ impl Target {
     format!("{}位置{}", self.dir.unwrap().to_string(), pos2string(self.pos.unwrap()))
   }
 
+  pub fn to_string_anti(&self) -> String {
+    format!("{}位置{}", self.dir.unwrap().anti().to_string(), pos2string(self.pos.unwrap()))
+  }
+
   pub fn pos(&self) -> Option<Pos> {
     self.pos
   }
@@ -159,13 +163,22 @@ impl Dir {
       Dir::Right => "↓".to_string(),
     }
   }
+
+  pub fn anti(self) -> Self {
+    match self {
+      Dir::Left => Dir::Right,
+      Dir::Right => Dir::Left,
+    }
+  }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Skill {
   Punch,
   Tie,
+  Untie,
   Move,
+  MoveTurn,
   Pass,
 }
 
@@ -174,8 +187,20 @@ impl Skill {
     [
       Self::Punch,
       Self::Tie,
+      Self::Untie,
       Self::Move, 
+      Self::MoveTurn,
       Self::Pass,
+    ].iter().cloned()
+  }
+
+  pub fn iter_sense() -> impl Iterator<Item = Self> {
+    [
+      Self::Punch,
+      Self::Tie,
+      Self::Untie,
+      Self::Move, 
+      Self::MoveTurn,
     ].iter().cloned()
   }
 
@@ -193,7 +218,9 @@ impl Skill {
     match self {
       Self::Punch => "挥拳",
       Self::Tie => "捆绑",
+      Self::Untie => "解绑",
       Self::Move => "移动",
+      Self::MoveTurn => "移动并转身",
       Self::Pass => "略过",
     }.to_string()
   }
@@ -222,6 +249,10 @@ impl BoundPart {
 
   pub fn struggle_order() -> Vec<Self> {
     vec!(Self::Lock, Self::Leg, Self::Arm, Self::Wrist)
+  }
+
+  pub fn untie_order() -> Vec<Self> {
+    vec!(Self::Lock, Self::Arm, Self::Wrist, Self::Leg)
   }
 
   pub fn to_string(&self) -> String {

@@ -10,20 +10,6 @@ use super::board::pawn::Pawn;
 use super::board::Board;
 use crate::game::common::*;
 
-#[derive(Debug, Clone)]
-enum BoundUpper {
-  None,
-  Wrist,
-  Full,
-}
-
-#[derive(Debug, Clone)]
-enum BoundLower {
-  None,
-  Leg,
-  Lock,
-}
-
 struct PawnShowList {
   name : String,
   team : Team,
@@ -145,7 +131,11 @@ impl Board {
       } else if pawn.unit().is_wait() {
         "w"
       } else if pawn.unit().is_action() {
-        "|"
+        if pawn.unit().can_action_sense() {
+          "|"
+        } else {
+          "x"
+        }
       } else {" "};
       // 位置
       let p = pos2string(i as Pos);

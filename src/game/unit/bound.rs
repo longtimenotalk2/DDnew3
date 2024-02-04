@@ -35,6 +35,20 @@ impl Bound {
     !self.wrist || !self.leg
   }
 
+  pub fn need_struggle(&self) -> bool {
+    for part in BoundPart::tie_order() {
+      match self.part_state(part) {
+        BoundState::None => (),
+        _ => return true,
+      }
+    }
+    false
+  }
+
+  pub fn need_untie(&self) -> bool {
+    self.need_struggle()
+  }
+
   // 定量影响
   pub fn move_coef(&self) -> f64 {
     let mut c = 1.0;
@@ -48,13 +62,13 @@ impl Bound {
   fn struggle_part_coef(&self, part : BoundPart) -> f64 {
     match part {
       BoundPart::Wrist => {
-        1.0 + (100. - self.part_tightness(part) as f64) * 0.01
+        0.5 + (100. - self.part_tightness(part) as f64) * 0.01
       },
       BoundPart::Arm => {
-        0.5 + (100. - self.part_tightness(part) as f64) * 0.005
+        0.25 + (100. - self.part_tightness(part) as f64) * 0.005
       },
       BoundPart::Leg => {
-        0.5 + (100. - self.part_tightness(part) as f64) * 0.005
+        0.25 + (100. - self.part_tightness(part) as f64) * 0.005
       },
       BoundPart::Lock => {
         (100.0 - self.part_tightness(part) as f64) * 0.005
@@ -181,22 +195,28 @@ impl Bound {
       None => (),
       Tieing => {
         *self.part_process_mut(part) = 0;
+        if SHOW_TIE_DETAIL == 1 {
+          println!("挣脱 {} 部 : 直接脱落", part.to_string());
+        }
       },
       _ => {
-        let t = self.part_tightness_mut(part);
-        let start = *t;
-        let rope_r = (*rope as f64 * coef).floor() as i32;
-        *t = *t - rope_r;
-        if *t > 0 {
-          *rope = 0;
-        } else {
-          *rope = (-*t as f64 * coef).floor() as i32;
-          *t = 0;
-          *self.part_is_mut(part) = false;
-        }
-        let end = self.part_tightness(part);
-        if SHOW_TIE_DETAIL == 1 {
-          println!("挣脱 {} 部: {start} -> {end}", part.to_string());
+        if *rope > 0 {
+          let t = self.part_tightness_mut(part);
+          let start = *t;
+          let rope_r = (*rope as f64 * coef).floor() as i32;
+          *t = *t - rope_r;
+          if *t > 0 {
+            *rope = 0;
+          } else {
+            *rope = (-*t as f64 * coef).floor() as i32;
+            *t = 0;
+            *self.part_is_mut(part) = false;
+            *self.part_process_mut(part) = 0;
+          }
+          let end = self.part_tightness(part);
+          if SHOW_TIE_DETAIL == 1 {
+            println!("挣脱 {} 部 : {start} -> {end}", part.to_string());
+          }
         }
       },
     }
@@ -209,9 +229,9 @@ impl Bound {
     }
     // 根据顺序依次挣脱
     for part in BoundPart::struggle_order() {
-      if rope > 0 {
-        self.struggle_part(part, &mut rope);
-      }
+      
+      self.struggle_part(part, &mut rope);
+      
     }
     // 如手腕已解绑，立即解绑腿部
     if self.part_state(BoundPart::Wrist) == BoundState::None {
@@ -219,6 +239,46 @@ impl Bound {
       self.struggle_part(BoundPart::Leg, &mut rope);
     }
   }
+  
+  pub fn untie_part(&mut self, part : BoundPart, rope: &mut i32) {
+    use BoundState::*;
+    match self.part_state(part) {
+      None => (),
+      Tieing => {
+        *self.part_process_mut(part) = 0;
+        if SHOW_TIE_DETAIL == 1 {
+          println!("解绑 {} 部 : 直接脱落", part.to_string());
+        }
+      },
+      _ => {
+        if *rope > 0 {
+          let t = self.part_tightness_mut(part);
+          let start = *t;
+          *t = *t - *rope;
+          if *t > 0 {
+            *rope = 0;
+          } else {
+            *rope = -*t;
+            *t = 0;
+            *self.part_is_mut(part) = false;
+            *self.part_process_mut(part) = 0;
+          }
+          let end = self.part_tightness(part);
+          if SHOW_TIE_DETAIL == 1 {
+            println!("解绑 {} 部 : {start} -> {end}", part.to_string());
+          }
+        }
+      },
+    }
+  }
+
+  pub fn untie_main(&mut self, mut rope : i32) {
+    // 根据顺序依次解绑
+    for part in BoundPart::untie_order() {
+      self.untie_part(part, &mut rope);
+    }
+  }
+  
 }
 
 fn state(is : bool, process : i32, tightness : i32) -> BoundState {
@@ -246,7 +306,15 @@ impl Unit {
     self.skl() * 5 + 100
   }
 
+  pub fn untie_ability(&self) -> i32 {
+    self.skl() * 10 + 100
+  }
+
   pub fn be_tie_exe(&mut self, rope : i32) {
     self.bound.tie_main(rope);
+  }
+
+  pub fn be_untie_exe(&mut self, rope : i32) {
+    self.bound.untie_main(rope);
   }
 }

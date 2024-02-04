@@ -9,9 +9,21 @@ impl Unit {
     match skill {
       Skill::Punch => self.can_punch(),
       Skill::Tie => self.can_tie(),
+      Skill::Untie => self.can_tie(),
       Skill::Move => self.can_move(),
+      Skill::MoveTurn => self.can_move(),
       Skill::Pass => true,
     }
+  }
+
+  // 是否能执行有意义的行动
+  pub fn can_action_sense(&self) -> bool {
+    for skl in Skill::iter_sense() {
+      if self.can_skill(skl) {
+        return true;
+      }
+    }
+    false
   }
 
   pub fn can_skill_list(&self) -> Vec<Skill> {
@@ -29,14 +41,9 @@ impl Unit {
     self.state.is_able() && self.pose.is_stand() && self.bound.is_lower_able()
   }
 
-  pub fn can_block(&self, move_dir : Dir) -> bool {
+  pub fn can_block(&self, _move_dir : Dir) -> bool {
     // 阻挡的条件，可以移动，且不能处于pin或者正在捆绑的状态
-    if self.can_move() && !self.pose.is_pin() && !self.pose.is_tieing() {
-      if let Some(dir) = self.pose.dir() {
-        return dir != move_dir
-      } 
-    }
-    false
+    self.can_move() && !self.pose.is_pin() && !self.pose.is_tieing() 
   }
 
   fn can_punch(&self) -> bool {
@@ -57,9 +64,38 @@ impl Unit {
     !self.pose.is_stand()
   }
 
+  pub fn can_be_untie(&self) -> bool {
+    // 能被解绑的条件：有绳索
+    self.bound.need_untie()
+  }
+
   pub fn can_struggle(&self) -> bool {
     // 挣脱条件，没晕且没被控
     self.state.is_able() && !self.pose.is_ctrled()
+  }
+
+  pub fn can_anti_ctrl(&self) -> bool {
+    // 防控条件，没晕
+    self.state.is_able()
+  }
+
+  pub fn anti_ctrl_pro(&self, force : i32) -> i32 {
+    (self.anti_ctrl_ability() - force) * 10 + 100
+  }
+
+  pub fn ctrl_ability(&self) -> i32 {
+    self.str()
+  }
+
+  fn anti_ctrl_ability(&self) -> i32 {
+    let mut a = self.str() as f64;
+    if !self.bound.is_upper_able() {
+      a *= 0.5;
+    }
+    if !self.bound.is_lower_able() {
+      a *= 0.5;
+    }
+    a.floor() as i32
   }
 }
 
