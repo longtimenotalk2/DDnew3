@@ -23,6 +23,24 @@ impl Unit {
     }
   }
 
+  pub fn kick_ability(&self) -> AttackInput {
+    // 攻击力=力量
+    let atk = self.str() + 10;
+    // 命中，技术相关，取决于移动能力
+    let acc = ((50. + self.skl() as f64 * 5.) * self.bound.move_coef()) as i32;
+    // 穿透，技术相关，取决于移动能力
+    let pir = ((50. + self.skl() as f64 * 5.) * self.bound.move_coef()) as i32;
+    // 重击，技术相关，取决于移动能力
+    let whk = ((75. + self.skl() as f64 * 2.) * self.bound.move_coef()) as i32;
+    
+    AttackInput {
+      atk,
+      acc,
+      pir,
+      whk,
+    }
+  }
+
   pub fn be_attack_analyse(&self, dir : Dir, input : &AttackInput) -> AttackAnalyse {
     // 命中率 = 精准 - 闪避
     let hit = i2pro(input.acc - self.evd(dir));

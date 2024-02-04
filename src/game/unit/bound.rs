@@ -233,10 +233,10 @@ impl Bound {
       self.struggle_part(part, &mut rope);
       
     }
-    // 如手腕已解绑，立即解绑腿部
+    // 如手腕已解绑，自解绑腿部
     if self.part_state(BoundPart::Wrist) == BoundState::None {
       let mut rope = 10000;
-      self.struggle_part(BoundPart::Leg, &mut rope);
+      self.untie_part(BoundPart::Leg, &mut rope);
     }
   }
   

@@ -78,6 +78,13 @@ impl Board {
           let txt = format!("{name} ({})", analyse.to_string());
           options.push(txt);
         }
+        Skill::Kick => {
+          let name = self.pos2pawn(target.pos().unwrap()).unit().name.clone();
+          let atk_input = self.id2pawn(id).unit().kick_ability();
+          let analyse = self.pos2pawn(target.pos().unwrap()).unit().be_attack_analyse(target.dir().unwrap(), &atk_input);
+          let txt = format!("{name} ({})", analyse.to_string());
+          options.push(txt);
+        }
         Skill::Tie => {
           let name = self.pos2pawn(target.pos().unwrap()).unit().name.clone();
           options.push(name);
@@ -111,6 +118,12 @@ impl Board {
         let mut targets = Vec::new();
         match skl {
           Skill::Punch => {
+            let can_move = pawn.unit().can_move();
+            for (pos, dir) in self.melee_option(*id, can_move) {
+              targets.push(Target::new_attack(pos, dir))
+            }
+          },
+          Skill::Kick => {
             let can_move = pawn.unit().can_move();
             for (pos, dir) in self.melee_option(*id, can_move) {
               targets.push(Target::new_attack(pos, dir))

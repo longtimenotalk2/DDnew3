@@ -27,7 +27,12 @@ impl Board {
       Skill::Punch => {
         let pos = tgt.pos().unwrap();
         let dir = tgt.dir().unwrap();
-        self.punch_exe(id, pos, dir);
+        self.melee_exe(id, pos, dir, Skill::Punch);
+      },
+      Skill::Kick => {
+        let pos = tgt.pos().unwrap();
+        let dir = tgt.dir().unwrap();
+        self.melee_exe(id, pos, dir, Skill::Kick);
       },
       Skill::Tie => {
         let pos = tgt.pos().unwrap();

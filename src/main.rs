@@ -30,14 +30,14 @@ fn test_team() {
 
 pub fn debug() {
   // let mut board = Board::new( DiceOne::new());
-  let mut board = Board::new( DiceWy::new(114514));
+  let mut board = Board::new( DiceWy::new(114515));
 
   
   let noel = Unit::new("诺艾尔", 13, 13, 15, Dir::Right);
   let mut alyssa = Unit::new("艾丽莎", 11, 15, 16, Dir::Right);
   alyssa.fall_exe();
   alyssa.be_tie_exe(400);
-  let boss = Unit::new("奎  诺", 10, 10, 10, Dir::Left);
+  let boss = Unit::new("奎  诺", 12, 12, 12, Dir::Left);
   let small1 = Unit::new("小弟甲", 10, 10, 10, Dir::Left);
 
   // board.insert_unit(noel, 0);

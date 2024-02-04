@@ -116,7 +116,9 @@ impl Pose {
   pub fn pin_exe(&mut self, dir : Dir) {
     if self.pin == false {
       self.pin = true;
-      self.dir = Some(dir.anti());
+      if !self.tieing {
+        self.dir = Some(dir.anti());
+      }
     }
   }
 

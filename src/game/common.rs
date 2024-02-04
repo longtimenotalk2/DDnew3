@@ -175,6 +175,7 @@ impl Dir {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Skill {
   Punch,
+  Kick,
   Tie,
   Untie,
   Move,
@@ -186,6 +187,7 @@ impl Skill {
   pub fn iter() -> impl Iterator<Item = Self> {
     [
       Self::Punch,
+      Self::Kick,
       Self::Tie,
       Self::Untie,
       Self::Move, 
@@ -197,6 +199,7 @@ impl Skill {
   pub fn iter_sense() -> impl Iterator<Item = Self> {
     [
       Self::Punch,
+      Self::Kick,
       Self::Tie,
       Self::Untie,
       Self::Move, 
@@ -217,6 +220,7 @@ impl Skill {
   pub fn to_string(&self) -> String {
     match self {
       Self::Punch => "挥拳",
+      Self::Kick => "踢腿",
       Self::Tie => "捆绑",
       Self::Untie => "解绑",
       Self::Move => "移动",

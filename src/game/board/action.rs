@@ -89,11 +89,16 @@ impl Board {
     list
   }
 
-  pub fn punch_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
+  pub fn melee_exe(&mut self, id : Id, pos : Pos, dir : Dir, skl : Skill) {
     // 取消控制
     self.cancel_ctrl_try(id);
     // 攻击部分
-    let atk_input = self.id2pawn(id).unit().punch_ability();
+    
+    let atk_input = match skl { 
+      Skill::Punch => self.id2pawn(id).unit().punch_ability(),
+      Skill::Kick => self.id2pawn(id).unit().kick_ability(),
+      _ => unreachable!(),
+  };
     let analyse = self.pos2pawn(pos).unit().be_attack_analyse(dir, &atk_input);
     let r_hit = self.dice.d100();
     let r_stt = self.dice.d100();
