@@ -184,18 +184,6 @@ pub enum Skill {
 }
 
 impl Skill {
-  pub fn iter() -> impl Iterator<Item = Self> {
-    [
-      Self::Punch,
-      Self::Kick,
-      Self::Tie,
-      Self::Untie,
-      Self::Move, 
-      Self::MoveTurn,
-      Self::Pass,
-    ].iter().cloned()
-  }
-
   pub fn iter_sense() -> impl Iterator<Item = Self> {
     [
       Self::Punch,
@@ -209,7 +197,7 @@ impl Skill {
 
   pub fn sort(v : &mut Vec<Self>) {
     let mut v2 = Vec::new();
-    for skl in Self::iter() {
+    for skl in Self::iter_sense() {
       if v.contains(&skl){
         v2.push(skl);
       }

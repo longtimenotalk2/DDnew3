@@ -29,7 +29,7 @@ impl Unit {
 
   pub fn can_skill_list(&self) -> Vec<Skill> {
     let mut list = Vec::new();
-    for skl in Skill::iter() {
+    for skl in Skill::iter_sense() {
       if self.can_skill(skl) {
         list.push(skl);
       }

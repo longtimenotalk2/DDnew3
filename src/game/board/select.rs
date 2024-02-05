@@ -34,8 +34,38 @@ impl SelectSet {
 
 impl Board {
   pub fn turn_select(&self, ids : &[Id], can_wait : bool) -> Selection {
+    let mut now : (Option<Id>, Option<Skill>, Option<Target>) = (None, None, None);
     let set = self.select_set(ids);
-    // 选择角色或者等待
+    loop {
+      if let Some(id) = now.0 {
+        if let Some(skill) = now.1 {
+          // 选择目标/返回上一级
+          if let Some(target) = self.choose_target(id, skill, &set) {
+            return Selection::Normal(id, skill, target);
+          } else {
+            now.1 = None;
+          }
+        } else {
+          // 选择技能/返回上一级
+          if let Some(skl) = self.choose_skill(id, &set) {
+            now.1 = Some(skl);
+          } else {
+            now.0 = None;
+          }
+        }
+      } else {
+        // 选择行动角色/全跳过/等待
+        let (pass, wait, id) = self.choose_id(ids, can_wait);
+        if pass {return Selection::AllPass;}
+        if wait {return Selection::Wait;}
+        now = (Some(id.unwrap()), None, None);
+      }
+    }
+    
+  }
+
+  fn choose_id(&self, ids : &[Id], can_wait : bool) -> (bool, bool, Option<Id>) {
+    // 返回值，是否全跳过，是否等待，选中的id
     let mut options : Vec<String> = ids.iter().map(|id| self.id2pawn(*id).unit().name.clone()).collect();
     options.push("全部略过".to_string());
     if can_wait {
@@ -44,14 +74,16 @@ impl Board {
     let index = io("请选择希望行动的角色：".to_string(), &options, None);
     if index == ids.len() + 1 {
       // 执行了等待
-      return Selection::Wait;
+      return (false, true, None);
     } else if index == ids.len() {
       // 执行了全部略过
-      return Selection::AllPass;
+      return (true, false, None);
     } 
     let id = ids[index];
+    return (false, false, Some(id));
+  }
 
-    // 选择技能
+  fn choose_skill(&self, id : Id, set : &SelectSet) -> Option<Skill> {
     let skills = set.id2skills(id);
     let mut skills_can = vec!();
     for skill in &skills {
@@ -60,12 +92,20 @@ impl Board {
       }
     }
     Skill::sort(&mut skills_can);
-    let options : Vec<String> = skills_can.iter().map(|s| s.to_string()).collect();
+    let mut options : Vec<String> = skills_can.iter().map(|s| s.to_string()).collect();
+    options.push("返回上一级".to_string());
     
     let title = format!("{} 选择技能", self.id2pawn(id).unit().name);
     let index = io(title, &options, None);
+    if index == options.len() - 1 {
+      // 返回上一级
+      return None;
+    }
     let skill = skills_can[index];
+    Some(skill)
+  }
 
+  fn choose_target(&self, id : Id, skill : Skill, set : &SelectSet) -> Option<Target> {
     // 选择目标
     let targets = set.skill2targets(id, skill);
     let mut options = vec!();
@@ -100,11 +140,15 @@ impl Board {
         _ => options.push("无目标".to_string()),
       }
     }
+    options.push("返回上一级".to_string());
     let title = format!("{} 为 {} 选择目标", self.id2pawn(id).unit().name, skill.to_string());
     let index = io(title, &options, None);
+    if index == options.len() - 1 {
+      // 返回上一级
+      return None;
+    }
     let target = targets[index].clone();
-
-    Selection::Normal(id, skill, target)
+    Some(target)
   }
   
   // 根据可动角色，生成完整的SelectSet
