@@ -4,3 +4,4 @@ pub mod board;
 pub mod show;
 pub mod io;
 pub mod dice;
+pub mod ai;

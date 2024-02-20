@@ -35,6 +35,20 @@ impl AttackAnalyse {
   pub fn to_string(&self) -> String {
     format!("命{}, 穿{}, 爆{}, {}/{}/{}", self.hit, self.stt, self.cri, self.dmg_asd, self.dmg_stt, self.dmg_cri)
   }
+
+  pub fn expect_damage(&self) -> f64 {
+    let mut r = 0.;
+    let hit = self.hit as f64 / 100.;
+    let stt = self.stt as f64 / 100.;
+    let cri = self.cri as f64 / 100.;
+    let dmg_asd = self.dmg_asd as f64;
+    let dmg_stt = self.dmg_stt as f64;
+    let dmg_cri = self.dmg_cri as f64;
+    r += hit * stt * cri * dmg_cri;
+    r += hit * stt * (1. - cri) * dmg_stt;
+    r += hit * (1. - stt) * dmg_asd;
+    r
+  }
 }
 
 #[derive(Debug, Clone)]
@@ -170,6 +184,11 @@ impl Dir {
       Dir::Right => Dir::Left,
     }
   }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Ai {
+  Basic,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]

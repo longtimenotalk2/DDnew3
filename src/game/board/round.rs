@@ -18,14 +18,14 @@ pub struct Round {
   team_now : Option<Team>,
 }
 
-impl Round {
-  pub fn show(&self) {
-    println!("Round: {}", self.round_num);
-    println!("Phase: {:?}", self.phase);
-    println!("AP: {:?}", self.ap);
-    println!("Team now: {:?}", self.team_now);
-  }
-}
+// impl Round {
+//   pub fn show(&self) {
+//     println!("Round: {}", self.round_num);
+//     println!("Phase: {:?}", self.phase);
+//     println!("AP: {:?}", self.ap);
+//     println!("Team now: {:?}", self.team_now);
+//   }
+// }
 
 impl Round {
   pub fn new() -> Self {
@@ -43,15 +43,20 @@ impl Round {
 }
 
 impl Board {
-  pub fn main_loop(&mut self) {
+  // 0 0队胜，1 1队胜，2 其它
+  pub fn main_loop(&mut self) -> Option<u8> {
     match self.round.phase {
       Phase::Start => self.start(),
       Phase::Main => self.main(),
-      Phase::End => {self.end()},
+      Phase::End => {
+        return self.end()
+      },
     }
+    None
   }
 
   fn start(&mut self) {
+    println!("======第 {} 回合开始======", self.round.round_num);
     for pawn in self.pawns.iter_mut() {
       pawn.unit_mut().round_start();
     }
@@ -60,7 +65,7 @@ impl Board {
     self.round.phase = Phase::Main;
   }
 
-  fn end(&mut self) {
+  fn end(&mut self) -> Option<u8> {
     // 反控制
     for i in 0..self.pawns.len() {
       if let Some(tie_id) = self.pawns[i].unit().ctrled_id() { 
@@ -101,6 +106,29 @@ impl Board {
     self.round.team_now = None;
     self.round.ap = None;
     self.round.round_num += 1;
+
+    // 胜负判定
+    let mut t0d = true;
+    let mut t1d = true;
+    for pawn in &self.pawns {
+      let team = pawn.team();
+      if !pawn.unit().is_defeated() {
+        match team {
+          0 => t0d = false,
+          1 => t1d = false,
+          _ => unreachable!(),
+        }
+      }
+    }
+    if t0d && !t1d {
+      Some(1)
+    } else if !t0d && t1d {
+      Some(0)
+    } else if t0d && t1d {
+      Some(9)
+    } else {
+      None
+    }
   }
 
   fn main(&mut self) {
@@ -110,13 +138,19 @@ impl Board {
     }
     // 寻找当前方的可动角色，如果不存在则直接进入结束阶段
     let ids = self.next_can_action_ids();
-    self.round.show();
+    //self.round.show();
     if !ids.is_empty() {
       // 显示
       self.show_w_ids(&ids);
       // 处理这些角色的选择（在select mod）
       let can_wait = self.can_wait();
-      let selected = self.turn_select(&ids, can_wait);
+      let team_now = self.round.team_now.unwrap();
+      let is_ai = match team_now {
+        0 => self.team_0_use_ai,
+        1 => self.team_1_use_ai,
+        _ => unreachable!(),
+      };
+      let selected = self.turn_select(&ids, can_wait, is_ai);
       use super::select::Selection;
       match selected {
         Selection::Normal(id, skl, tgt) => {

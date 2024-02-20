@@ -317,4 +317,8 @@ impl Unit {
   pub fn be_untie_exe(&mut self, rope : i32) {
     self.bound.untie_main(rope);
   }
+
+  pub fn is_defeated(&self) -> bool {
+    self.bound.is_full()
+  }
 }

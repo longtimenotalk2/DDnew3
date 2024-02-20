@@ -13,6 +13,8 @@ pub struct Board {
   pawns : Vec<Pawn>,
   round : Round,
   dice : Box<dyn Dice>,
+  team_0_use_ai : bool,
+  team_1_use_ai : bool,
 }
 
 impl Board {
@@ -22,6 +24,8 @@ impl Board {
       pawns : vec!(),
       round : Round::new(),
       dice : Box::new(dice),
+      team_0_use_ai : false,
+      team_1_use_ai : true,
     }
   }
 
@@ -39,8 +43,13 @@ impl Board {
     self.show_one_line(ids);
   }
 
-  pub fn play(&mut self) {
-    loop {self.main_loop()};
+  pub fn play(&mut self) -> u8 {
+    loop {
+      let r = self.main_loop();
+      if let Some(r) = r {
+        return r;
+      }
+    };
   }
 
   // 查找

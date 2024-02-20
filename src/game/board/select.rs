@@ -17,25 +17,33 @@ pub enum Selection {
   Normal(Id, Skill, Target),
 }
 
-struct SelectSet {
+pub struct SelectSet {
   set : HashMap<Id, HashMap<Skill, Vec<Target>>>,
 }
 
 impl SelectSet {
-  fn id2skills(&self, id : Id) -> Vec<Skill> {
+  pub fn id2skills(&self, id : Id) -> Vec<Skill> {
     self.set.get(&id).unwrap().keys().cloned().collect()
   }
 
-  fn skill2targets(&self, id : Id, skill : Skill) -> Vec<Target> {
+  pub fn skill2targets(&self, id : Id, skill : Skill) -> Vec<Target> {
     self.set.get(&id).unwrap().get(&skill).unwrap().clone()
   }
-    
+
+  pub fn data(&self) -> &HashMap<Id, HashMap<Skill, Vec<Target>>> {
+    &self.set
+  }
+
 }
 
 impl Board {
-  pub fn turn_select(&self, ids : &[Id], can_wait : bool) -> Selection {
+  pub fn turn_select(&self, ids : &[Id], can_wait : bool, use_ai : bool) -> Selection {
     let mut now : (Option<Id>, Option<Skill>, Option<Target>) = (None, None, None);
     let set = self.select_set(ids);
+    if use_ai {
+      use crate::game::ai::basic;
+      return basic::basic_ai(&self, &set)
+    }
     loop {
       if let Some(id) = now.0 {
         if let Some(skill) = now.1 {
@@ -127,7 +135,12 @@ impl Board {
         }
         Skill::Tie => {
           let name = self.pos2pawn(target.pos().unwrap()).unit().name.clone();
-          options.push(name);
+          let tar = self.pos2pawn(target.pos().unwrap()).unit();
+          let pro = if tar.can_anti_ctrl() {100} else {
+            let force = self.id2pawn(id).unit().ctrl_ability();
+            100 - tar.anti_ctrl_pro(force)
+          };
+          options.push(format!("{name}, 成功率 {pro} %"));
         },
         Skill::Untie => {
           let name = self.pos2pawn(target.pos().unwrap()).unit().name.clone();

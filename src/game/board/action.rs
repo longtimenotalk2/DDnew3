@@ -25,6 +25,11 @@ impl Board {
     // 取消控制
     self.cancel_ctrl_try(id);
     let target_id = self.pos2id(pos);
+
+    if SHOW_BATTLE_DETAIL == 1 {
+      println!("\n{} 捆绑 {}\n", self.id2pawn(id).unit().name, self.id2pawn(target_id).unit().name);
+    }
+    
     // 如已经被控，解除
     if let Some(id) = self.id2pawn(target_id).unit().ctrled_id() {
       self.cancel_ctrl_force(id);
@@ -60,6 +65,10 @@ impl Board {
   }
 
   pub fn untie_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
+    if SHOW_BATTLE_DETAIL == 1 {
+      println!("\n{} 解绑 {}\n", self.id2pawn(id).unit().name, self.pos2pawn(pos).unit().name);
+    }
+    
     // 取消控制
     self.cancel_ctrl_try(id);
 
@@ -90,6 +99,9 @@ impl Board {
   }
 
   pub fn melee_exe(&mut self, id : Id, pos : Pos, dir : Dir, skl : Skill) {
+    if SHOW_BATTLE_DETAIL == 1 {
+      println!("\n{} {} {}", self.id2pawn(id).unit().name, skl.to_string(), self.pos2pawn(pos).unit().name);
+    }
     // 取消控制
     self.cancel_ctrl_try(id);
     // 攻击部分
@@ -98,7 +110,7 @@ impl Board {
       Skill::Punch => self.id2pawn(id).unit().punch_ability(),
       Skill::Kick => self.id2pawn(id).unit().kick_ability(),
       _ => unreachable!(),
-  };
+    };
     let analyse = self.pos2pawn(pos).unit().be_attack_analyse(dir, &atk_input);
     let r_hit = self.dice.d100();
     let r_stt = self.dice.d100();
@@ -116,7 +128,11 @@ impl Board {
       Dir::Left => pos + 1,
       Dir::Right => pos - 1,
     };
-    self.move_exe(id, pos_new, dir)
+    self.move_exe(id, pos_new, dir);
+
+    if SHOW_BATTLE_DETAIL == 1 {
+      println!("");
+    } 
   }
   
   // 移动
