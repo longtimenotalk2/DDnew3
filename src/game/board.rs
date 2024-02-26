@@ -15,17 +15,18 @@ pub struct Board {
   dice : Box<dyn Dice>,
   team_0_use_ai : bool,
   team_1_use_ai : bool,
+  
 }
 
 impl Board {
-  pub fn new(dice : impl Dice + 'static) -> Self {
+  pub fn new(dice : impl Dice + 'static, ai0 : bool, ai1 : bool, round_limit : Option<i32>) -> Self {
     
     Board {
       pawns : vec!(),
-      round : Round::new(),
+      round : Round::new(round_limit),
       dice : Box::new(dice),
-      team_0_use_ai : false,
-      team_1_use_ai : true,
+      team_0_use_ai : ai0,
+      team_1_use_ai : ai1,
     }
   }
 

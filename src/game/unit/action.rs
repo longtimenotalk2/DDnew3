@@ -15,6 +15,9 @@ impl Unit {
       }
       let rope = self.str() * 10;
       self.bound.struggle_main(rope);
+      if SHOW_TIE_DETAIL == 1 {
+        println!("");
+      }
     }
     // 起身（清醒，没被控，束缚状态允许起身）
     if self.state.is_able() && !self.is_ctrled() && self.bound.can_stand() {

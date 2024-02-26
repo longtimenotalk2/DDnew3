@@ -7,7 +7,7 @@ use crate::game::common::*;
 
 use crate::game::io::io;
 
-use std::collections::HashMap;
+use std::collections::{BTreeMap, HashMap};
 
 // 选择分3步：选人，选技能，选目标（Option<Pos>）
 
@@ -18,7 +18,7 @@ pub enum Selection {
 }
 
 pub struct SelectSet {
-  set : HashMap<Id, HashMap<Skill, Vec<Target>>>,
+  set : BTreeMap<Id, HashMap<Skill, Vec<Target>>>,
 }
 
 impl SelectSet {
@@ -30,7 +30,7 @@ impl SelectSet {
     self.set.get(&id).unwrap().get(&skill).unwrap().clone()
   }
 
-  pub fn data(&self) -> &HashMap<Id, HashMap<Skill, Vec<Target>>> {
+  pub fn data(&self) -> &BTreeMap<Id, HashMap<Skill, Vec<Target>>> {
     &self.set
   }
 
@@ -167,7 +167,7 @@ impl Board {
   // 根据可动角色，生成完整的SelectSet
   fn select_set(&self, ids : &[Id]) -> SelectSet {
     // 生成所有行动分支
-    let mut set : HashMap<Id, HashMap<Skill, Vec<Target>>> = HashMap::new();
+    let mut set : BTreeMap<Id, HashMap<Skill, Vec<Target>>> = BTreeMap::new();
     for id in ids {
       let mut sklset : HashMap<Skill, Vec<Target>> = HashMap::new();
       let pawn = self.id2pawn(*id);
@@ -192,6 +192,9 @@ impl Board {
               targets.push(Target::new_attack(pos, dir))
             }
           },
+          Skill::ContinueTie => {
+            targets.push(Target::empty())
+          }
           Skill::Untie => {
             let can_move = pawn.unit().can_move();
             for (pos, dir) in self.untie_option(*id, can_move) {

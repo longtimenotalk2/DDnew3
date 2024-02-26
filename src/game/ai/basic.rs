@@ -9,16 +9,38 @@ impl SelectSet {
     }
     None
   }
+
+  // fn smallest_id(&self) -> Option<Id> {
+  //   let mut min = None;
+  //   for (id, _) in self.data().iter() {
+  //     if min.is_none() {
+  //       min = Some(*id);
+  //     } else {
+  //       if min.unwrap() > *id {
+  //         min = Some(*id);
+  //       }
+  //     }
+  //   }
+  //   min
+  // }
 }
 
 pub fn basic_ai(board: &Board, set : &SelectSet) -> Selection {
   // 按角色顺序动，永不等待
+  // 优先继续捆绑
   // 优先捆绑没正在被绑的角色，然后优先解绑，然后优先攻击能造成最高输出的敌人，最后略过
 
   // 自然顺序选择角色
   let id = set.first_id().unwrap();
   let skills = set.id2skills(id);
 
+  // 继续捆绑（只要没完全绑死）
+  if skills.contains(&Skill::ContinueTie) {
+    let tar = board.id2pawn(id).unit().tieing_id().unwrap();
+    if !board.id2pawn(tar).unit().is_defeated() {
+      return Selection::Normal(id, Skill::ContinueTie, Target::empty());
+    }
+  }
   // 如果能捆绑，则对没捆好且没正在被捆的角色捆绑
   if skills.contains(&Skill::Tie) {
     let tars = set.skill2targets(id, Skill::Tie);

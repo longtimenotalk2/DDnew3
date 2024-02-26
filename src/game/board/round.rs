@@ -16,6 +16,7 @@ pub struct Round {
   phase : Phase,
   ap : Option<i32>,
   team_now : Option<Team>,
+  round_limit : Option<i32>,
 }
 
 // impl Round {
@@ -28,12 +29,13 @@ pub struct Round {
 // }
 
 impl Round {
-  pub fn new() -> Self {
+  pub fn new(limit : Option<i32>) -> Self {
     Round {
       round_num : 0,
       phase : Phase::Start,
       ap : None,
       team_now : None,
+      round_limit : limit,
     }
   }
 
@@ -56,7 +58,8 @@ impl Board {
   }
 
   fn start(&mut self) {
-    println!("======第 {} 回合开始======", self.round.round_num);
+    self.round.round_num += 1;
+    println!("======第 {} 回合开始======\n", self.round.round_num);
     for pawn in self.pawns.iter_mut() {
       pawn.unit_mut().round_start();
     }
@@ -81,7 +84,7 @@ impl Board {
             let name_1 = &self.pawns[i].unit().name;
             let name_2 = &self.id2pawn(tie_id).unit().name;
             let istxt = if is { "成功" } else { "失败" };
-            println!("{name_1} 从 {name_2} 挣脱，{pro}%，{istxt}");
+            println!("{name_1} 从 {name_2} 挣脱，{pro}%，{istxt}\n");
           }
         }
       }
@@ -100,12 +103,14 @@ impl Board {
           println!("{name1} 捆绑 {name2} :", );
         }
         unit.be_tie_exe(rope);
+        if SHOW_BATTLE_DETAIL == 1 {
+          println!("");
+        }
       }
     }
     self.round.phase = Phase::Start;
     self.round.team_now = None;
     self.round.ap = None;
-    self.round.round_num += 1;
 
     // 胜负判定
     let mut t0d = true;
@@ -127,7 +132,15 @@ impl Board {
     } else if t0d && t1d {
       Some(9)
     } else {
-      None
+      if let Some(limit) = self.round.round_limit {
+        if self.round.round_num >= limit {
+          Some(2)
+        } else {
+          None
+        }
+      }else {
+        None
+      }
     }
   }
 

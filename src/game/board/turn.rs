@@ -10,10 +10,15 @@ impl Board {
     unit.consume_action();
 
     // 行动前状态变化
+    let name = unit.name.clone();
     unit.turn_start();
 
     match skl {
-      Skill::Pass => {},
+      Skill::Pass => {
+        if SHOW_BATTLE_DETAIL == 1 {
+          println!("/n{name} 略过", );
+        }
+      },
       Skill::Move => {
         let pos = tgt.pos().unwrap();
         let dir = tgt.dir().unwrap();
@@ -39,6 +44,11 @@ impl Board {
         let dir = tgt.dir().unwrap();
         self.tie_exe(id, pos, dir);
       },
+      Skill::ContinueTie => {
+        if SHOW_BATTLE_DETAIL == 1 {
+          println!("\n{name} 继续捆绑\n");
+        }
+      }
       Skill::Untie => {
         let pos = tgt.pos().unwrap();
         let dir = tgt.dir().unwrap();

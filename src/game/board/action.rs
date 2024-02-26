@@ -27,7 +27,7 @@ impl Board {
     let target_id = self.pos2id(pos);
 
     if SHOW_BATTLE_DETAIL == 1 {
-      println!("\n{} 捆绑 {}\n", self.id2pawn(id).unit().name, self.id2pawn(target_id).unit().name);
+      println!("\n{} 开始捆绑 {}\n", self.id2pawn(id).unit().name, self.id2pawn(target_id).unit().name);
     }
     
     // 如已经被控，解除
@@ -75,6 +75,9 @@ impl Board {
     // 直接开始解绑
     let rope = self.id2pawn(id).unit().untie_ability();
     self.id2pawn_mut(self.pos2id(pos)).unit_mut().be_untie_exe(rope);
+    if SHOW_BATTLE_DETAIL == 1 {
+      println!("");
+    }
     
     // 移动
     let pos_new = match dir {

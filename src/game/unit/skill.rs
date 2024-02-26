@@ -10,6 +10,7 @@ impl Unit {
       Skill::Punch => self.can_punch(),
       Skill::Kick => self.can_kick(),
       Skill::Tie => self.can_tie(),
+      Skill::ContinueTie => self.can_continue_tie(),
       Skill::Untie => self.can_tie(),
       Skill::Move => self.can_move(),
       Skill::MoveTurn => self.can_move(),
@@ -62,6 +63,10 @@ impl Unit {
     self.state.is_able() && self.pose.is_stand() && self.bound.is_upper_able()
   }
 
+  fn can_continue_tie(&self) -> bool {
+    self.is_tieing()
+  }
+
   pub fn can_be_tie(&self) -> bool {
     // 能被绑的条件：处于倒地状态，且有部分没被绑
     if self.bound.is_full() {
@@ -86,7 +91,7 @@ impl Unit {
   }
 
   pub fn anti_ctrl_pro(&self, force : i32) -> i32 {
-    (self.anti_ctrl_ability() - force) * 10 + 100
+    i2pro((self.anti_ctrl_ability() - force) * 10 + 100)
   }
 
   pub fn ctrl_ability(&self) -> i32 {
