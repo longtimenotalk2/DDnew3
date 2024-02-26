@@ -45,8 +45,7 @@ impl Round {
 }
 
 impl Board {
-  // 0 0队胜，1 1队胜，2 其它
-  pub fn main_loop(&mut self) -> Option<u8> {
+  pub fn main_loop(&mut self) -> Option<PlayResult> {
     match self.round.phase {
       Phase::Start => self.start(),
       Phase::Main => self.main(),
@@ -68,7 +67,7 @@ impl Board {
     self.round.phase = Phase::Main;
   }
 
-  fn end(&mut self) -> Option<u8> {
+  fn end(&mut self) -> Option<PlayResult> {
     // 反控制
     for i in 0..self.pawns.len() {
       if let Some(tie_id) = self.pawns[i].unit().ctrled_id() { 
@@ -126,15 +125,15 @@ impl Board {
       }
     }
     if t0d && !t1d {
-      Some(1)
+      Some(PlayResult::Team1Win)
     } else if !t0d && t1d {
-      Some(0)
+      Some(PlayResult::Team0Win)
     } else if t0d && t1d {
-      Some(9)
+      Some(PlayResult::Error)
     } else {
       if let Some(limit) = self.round.round_limit {
         if self.round.round_num >= limit {
-          Some(2)
+          Some(PlayResult::RoundOver)
         } else {
           None
         }

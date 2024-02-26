@@ -176,6 +176,10 @@ impl Unit {
   pub fn start_be_tied(&mut self, id : Id) {
     self.pose.ctrled = true;
     self.pose.ctrled_id = Some(id);
+    if self.pose.stand {
+      self.fall_exe();
+    }
+    self.consume_action();
   }
   
   pub fn cancel_tieing(&mut self) -> Id {

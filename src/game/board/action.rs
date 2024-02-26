@@ -7,12 +7,13 @@ use crate::game::common::*;
 impl Board {
   // 捆绑
   pub fn tie_option(&self, id : Id, can_move : bool) -> Vec<(Pos, Dir)> {
+    let force = self.id2pawn(id).unit().str();
     let mut list = Vec::new();
     for scan in self.scan(id) {
       if scan.is_enemy && scan.can_touch {
         if can_move || scan.dis <= 1 {
           let tar = self.pos2pawn(scan.pos).unit();
-          if tar.can_be_tie() {
+          if tar.can_be_tie(force) {
             list.push((scan.pos, scan.dir.unwrap()))
           }
         }

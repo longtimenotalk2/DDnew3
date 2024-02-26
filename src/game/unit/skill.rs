@@ -67,10 +67,13 @@ impl Unit {
     self.is_tieing()
   }
 
-  pub fn can_be_tie(&self) -> bool {
-    // 能被绑的条件：处于倒地状态，且有部分没被绑
+  pub fn can_be_tie(&self, force : i32) -> bool {
+    // 能被绑的条件：处于倒地状态，且有部分没被绑，要么就是自身力量小于等于5且对方力量大于5
     if self.bound.is_full() {
       return false;
+    }
+    if self.str() <= 5 && force > 5 {
+      return true;
     }
     !self.pose.is_stand()
   }

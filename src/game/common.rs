@@ -279,6 +279,24 @@ impl BoundPart {
   }
 }
 
+pub enum PlayResult {
+  Team0Win,
+  Team1Win,
+  RoundOver,
+  Error,
+}
+
+impl PlayResult {
+  pub fn to_string(&self) -> String {
+    match self {
+      PlayResult::Team0Win => "我方胜利",
+      PlayResult::Team1Win => "对方胜利",
+      PlayResult::RoundOver => "超时",
+      PlayResult::Error => "异常结束",
+    }.to_string()
+  }
+}
+
 // 函数
 pub fn i2lv(i : i32) -> Option<i32> {
   if i <= 0 {

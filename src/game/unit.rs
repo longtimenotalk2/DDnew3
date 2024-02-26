@@ -41,7 +41,10 @@ impl Unit {
   // 定量能力值
   pub fn action_point(&self, fix : i32) -> Option<i32> {
     if self.is_action() && self.can_action_sense() {
-      let action_point = 100 * self.spd() + fix;
+      let mut action_point = 100 * self.spd() + fix;
+      if !self.is_tieing() {
+        action_point += 10000
+      }
       Some(action_point)
     } else {
       None

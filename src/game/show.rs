@@ -110,7 +110,12 @@ impl PawnShowList {
     line += &format!(" {arm}{wrist}{leg}{lock}");
 
     // 力、技、速
-    line += &format!("(力{:2}技{:2}速{:2})", self.str, self.skl, self.spd);
+    let strtxt = if self.str > 5 {
+      format!("{:2}", self.str)
+    } else {
+      add_color(&format!("{:2}", self.str), RED)
+    };
+    line += &format!("(力{}技{:2}速{:2})", strtxt, self.skl, self.spd);
 
     // 受伤
     line += &format!("伤{:2}", self.hurt);

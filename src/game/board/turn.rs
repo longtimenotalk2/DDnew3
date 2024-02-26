@@ -16,7 +16,7 @@ impl Board {
     match skl {
       Skill::Pass => {
         if SHOW_BATTLE_DETAIL == 1 {
-          println!("/n{name} 略过", );
+          println!("\n{name} 略过\n", );
         }
       },
       Skill::Move => {

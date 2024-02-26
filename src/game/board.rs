@@ -44,7 +44,7 @@ impl Board {
     self.show_one_line(ids);
   }
 
-  pub fn play(&mut self) -> u8 {
+  pub fn play(&mut self) -> PlayResult {
     loop {
       let r = self.main_loop();
       if let Some(r) = r {
