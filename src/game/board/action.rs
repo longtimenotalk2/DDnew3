@@ -67,7 +67,7 @@ impl Board {
 
   pub fn untie_exe(&mut self, id : Id, pos : Pos, dir : Dir) {
     if SHOW_BATTLE_DETAIL == 1 {
-      println!("\n{} 解绑 {}\n", self.id2pawn(id).unit().name, self.pos2pawn(pos).unit().name);
+      println!("\n{} 解绑 {}", self.id2pawn(id).unit().name, self.pos2pawn(pos).unit().name);
     }
     
     // 取消控制

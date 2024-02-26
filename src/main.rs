@@ -17,18 +17,18 @@ fn test_team() {
 
   let ai0 = true;
   let ai1 = true;
-  let dice = DiceWy::new(114516);
+  let dice = DiceWy::new(114517);
   let round_limit = Some(10);
   let mut board = Board::new(dice , ai0, ai1, round_limit);
   
-  board.insert_unit(noel, 0);
+  //board.insert_unit(noel, 0);
   board.insert_unit(elis, 0);
   board.insert_unit(alyssa, 0);
   board.insert_unit(yelin, 0);
   board.insert_unit(boss, 1);
   board.insert_unit(small1, 1);
   board.insert_unit(small2, 1);
-  board.insert_unit(small3, 1);
+  //board.insert_unit(small3, 1);
 
   
   let r = board.play();
